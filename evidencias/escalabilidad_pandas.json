@@ -1,0 +1,28 @@
+{
+ "limite_memoria_contenedor": "4096 MiB",
+ "pandas": "2.3.3",
+ "resultados": [
+  {
+   "estado": "OK",
+   "tiempo_s": 0.31,
+   "rss_pico_mib": 166,
+   "filas_resultado": 6547,
+   "escala": 1,
+   "filas": 45671
+  },
+  {
+   "estado": "OK",
+   "tiempo_s": 2.81,
+   "rss_pico_mib": 556,
+   "filas_resultado": 6547,
+   "escala": 10,
+   "filas": 456710
+  },
+  {
+   "estado": "OOM (proceso terminado por el kernel, SIGKILL)",
+   "tiempo_hasta_fallo_s": 32.77,
+   "escala": 100,
+   "filas": 4567100
+  }
+ ]
+}

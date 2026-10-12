@@ -1,0 +1,162 @@
+﻿
+==============================================================================
+ 0.1 FILAS Y COLUMNAS DE CADA ARCHIVO RAW (HDFS)
+==============================================================================
+archivo                                                      filas columnas
+operaciones/sunass_interrupciones.csv                        45671       16
+operaciones/sunass_anf.csv                                      16        4
+operaciones/sunass_hidrojets.csv                              9690       15
+clima/senamhi_clima.csv                                     416273       16
+geologia/ingemmet_peligros.csv (189 col. en origen)          37895       18
+infraestructura/datass_antiguedad.csv (desde .xlsx)          21171       14
+infraestructura/datass_estado.csv (desde .xlsx)              11444       14
+
+==============================================================================
+ 0.2 INTERRUPCIONES POR EPS (top 15) Y POR DEPARTAMENTO
+==============================================================================
++-----------------------+-----+-----+
+|EPS                    |count|pct  |
++-----------------------+-----+-----+
+|SEDAPAL                |29369|64.31|
+|SEDAPAR                |4898 |10.72|
+|SEDA AYACUCHO          |2031 |4.45 |
+|SEDACUSCO              |864  |1.89 |
+|EPS EMAPAT             |702  |1.54 |
+|EPS GRAU               |640  |1.4  |
+|EPS AGUAS DE LIMA NORTE|559  |1.22 |
+|SEDALIB                |516  |1.13 |
+|AGUA TUMBES            |475  |1.04 |
+|EMUSAP ABANCAY         |428  |0.94 |
+|EPSEL                  |412  |0.9  |
+|EPS ILO                |378  |0.83 |
+|EPS SELVA CENTRAL      |349  |0.76 |
+|EMAPA CAÑETE           |346  |0.76 |
+|EMAPICA                |304  |0.67 |
++-----------------------+-----+-----+
+only showing top 15 rows
+
++-------------+-----+-----+
+|DEPARTAMENTO |count|pct  |
++-------------+-----+-----+
+|LIMA         |27952|61.2 |
+|AREQUIPA     |4898 |10.72|
+|CALLAO       |2448 |5.36 |
+|AYACUCHO     |2031 |4.45 |
+|CUSCO        |1047 |2.29 |
+|MADRE DE DIOS|702  |1.54 |
+|ICA          |662  |1.45 |
+|PIURA        |640  |1.4  |
+|MOQUEGUA     |563  |1.23 |
+|JUNIN        |538  |1.18 |
+|LA LIBERTAD  |516  |1.13 |
+|APURIMAC     |477  |1.04 |
+|TUMBES       |475  |1.04 |
+|LAMBAYEQUE   |412  |0.9  |
+|SAN MARTIN   |409  |0.9  |
+|ANCASH       |309  |0.68 |
+|HUANUCO      |275  |0.6  |
+|AMAZONAS     |274  |0.6  |
+|CAJAMARCA    |261  |0.57 |
+|HUANCAVELICA |205  |0.45 |
+|LORETO       |163  |0.36 |
+|PUNO         |137  |0.3  |
+|PASCO        |112  |0.25 |
+|TACNA        |98   |0.21 |
+|UCAYALI      |67   |0.15 |
++-------------+-----+-----+
+
+Total filas interrupciones          : 45671
+Filas de SEDALIB                    : 516 (1.13 %)
+Filas del departamento LA LIBERTAD  : 516 (1.13 %)
+
+==============================================================================
+ 0.3 PRECIPITACION (PP) EN SENAMHI
+==============================================================================
++--------------------+------+------+--------+--------+----------+---------+---------+
+|valores_distintos_PP|PP_min|PP_max|PP_media|PP_nulos|PP_igual_0|fecha_min|fecha_max|
++--------------------+------+------+--------+--------+----------+---------+---------+
+|150                 |0.0   |32.5  |0.0445  |14440   |378897    |20150101 |20240630 |
++--------------------+------+------+--------+--------+----------+---------+---------+
+
+Estaciones y distritos cubiertos por SENAMHI:
++------------+----------+--------------------+-----------------+-----+
+|DEPARTAMENTO|PROVINCIA |DISTRITO            |ESTACION         |count|
++------------+----------+--------------------+-----------------+-----+
+|AREQUIPA    |CAYLLOMA  |SAN_ANTONIO_DE_CHUCA|IMATA            |83253|
+|AREQUIPA    |AREQUIPA  |POLOBAYA            |SAN_JOSE_DE_UZUNA|83256|
+|LIMA        |YAUYOS    |CARANIA             |CARANIA          |83253|
+|LIMA        |HUAROCHIRI|MATUCANA            |MATUCANA         |83255|
+|TACNA       |CANDARAVE |CANDARAVE           |CANDARAVE        |83256|
++------------+----------+--------------------+-----------------+-----+
+
+
+==============================================================================
+ 0.4 % DE COINCIDENCIA DE DISTRITO ENTRE FUENTES (base: distritos de interrupciones)
+==============================================================================
+Distritos distintos en interrupciones: 310 (crudos) / 310 (normalizados)
+fuente                           coincide texto crudo   coincide normalizado
+clima (SENAMHI)                       0 (  0.00 %)          0 (  0.00 %)
+peligros (INGEMMET NM_DIST)           0 (  0.00 %)        282 ( 90.97 %)
+antiguedad (DATASS)                 194 ( 62.58 %)        194 ( 62.58 %)
+
+==============================================================================
+ 0.5 FILAS ANTES Y DESPUES DE LOS JOINs DE LA VERSION ANTERIOR
+==============================================================================
+(A) analisis_modelo.py anterior: interrupciones JOIN clima ON DISTRITO JOIN peligros ON DISTRITO
+   antes                 : 45671 filas
+   despues JOIN clima    : 45671 filas | filas con clima encontrado   : 0
+   despues JOIN peligros : 45671 filas | filas con peligro encontrado : 0
+
+(B) procesamiento_spark.py anterior: JOIN clima ON (DISTRITO, FECHA_CORTE) y peligros ON DISTRITO (upper/trim)
+   FECHA_CORTE no nula con formato 'yyyy-MM-dd' sobre '20240418': 0 de 45671
+   antes                 : 45671 filas
+   despues JOIN clima    : 45671 filas
+   despues JOIN peligros : 3730914 filas  <-- explosion por JOIN muchos-a-muchos
+   (cada interrupcion se repite tantas veces como peligros tenga su distrito)
+
+==============================================================================
+ 0.6 VALORES QUE SALIAN EN LOS GRAFICOS ANTERIORES (reproduccion)
+==============================================================================
+Top 5 distritos (sin filtrar EPS/departamento):
++-----------------------+-----+
+|DISTRITO               |count|
++-----------------------+-----+
+|SAN JUAN DE LURIGANCHO |3988 |
+|VILLA MARIA DEL TRIUNFO|2976 |
+|VILLA EL SALVADOR      |2312 |
+|SAN JUAN DE MIRAFLORES |2054 |
+|ATE                    |1265 |
++-----------------------+-----+
+only showing top 5 rows
+
+PP tras fillna(12.5) y cast a int:
++------+-----+
+|PP_int|count|
++------+-----+
+|    12|45671|
++------+-----+
+
+NOM_PELIGRO tras fillna('Sismo/Huaico'):
++------------+-----+
+|NOM_PELIGRO |count|
++------------+-----+
+|Sismo/Huaico|45671|
++------------+-----+
+
+
+==============================================================================
+ 0.7 EXPLICACION
+==============================================================================
+* Distritos de Lima: el analisis no filtraba por EPS ni por departamento. SUNASS es un
+  reporte NACIONAL y SEDAPAL (Lima) concentra la mayoria de filas (ver 0.2), por eso el
+  top 5 eran distritos de Lima. SEDALIB / La Libertad es solo una fraccion pequena.
+* PP = 12 mm constante: SENAMHI solo trae estaciones en distritos de Arequipa, Lima-provincias
+  y Tacna (ver 0.3) y ninguno coincide con un distrito de interrupciones (0.4, coincidencia
+  0 %). El JOIN por DISTRITO no encontro clima para NINGUNA fila (0.5-A), todo PP quedo
+  nulo y fillna('12.5') lo relleno; al castear a int quedo 12. No es un dato observado.
+* 100 % 'Sismo/Huaico': INGEMMET escribe NM_DIST en Tipo Titulo ('La Molina') y SUNASS en
+  MAYUSCULAS ('LA MOLINA'); sin normalizar no hubo ninguna coincidencia (0.5-A) y
+  fillna('Sismo/Huaico') relleno el 100 %. Ademas 'Sismo/Huaico' no es una categoria
+  de INGEMMET. Al normalizar (version B) el JOIN 1-a-N multiplica filas.
+* En la version B la fecha se parseaba con 'yyyy-MM-dd' sobre valores 'yyyyMMdd', por lo
+  que FECHA_CORTE era nula y el JOIN de clima por fecha tampoco podia coincidir.

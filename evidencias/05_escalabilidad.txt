@@ -1,0 +1,50 @@
+﻿
+==============================================================================
+ 5. PRUEBA DE ESCALABILIDAD - SPARK (modo local)
+==============================================================================
+cores=16 | spark.driver.memory=1g (por defecto) | shuffle.partitions=200 | filas base=45671
+->     1X | filas=      45671 |     3.80 s | mem pico contenedor=  1142 MiB | spill mem=      0.0 MiB | spill disco=     0.0 MiB | OK
+->    10X | filas=     456710 |     4.27 s | mem pico contenedor=  1665 MiB | spill mem=      0.0 MiB | spill disco=     0.0 MiB | OK
+->   100X | filas=    4567100 |    25.87 s | mem pico contenedor=  1955 MiB | spill mem=   3737.4 MiB | spill disco=   388.1 MiB | OK
+26/10/12 02:32:12 ERROR Executor: Exception in task 12.0 in stage 79.0 (TID 3180)
+java.lang.OutOfMemoryError: Java heap space
+26/10/12 02:32:12 ERROR Executor: Exception in task 4.0 in stage 79.0 (TID 3172)
+java.lang.OutOfMemoryError: Java heap space
+26/10/12 02:32:12 ERROR Executor: Exception in task 0.0 in stage 79.0 (TID 3168)
+java.lang.OutOfMemoryError: Java heap space
+26/10/12 02:32:12 ERROR Executor: Exception in task 14.0 in stage 79.0 (TID 3182)
+java.lang.OutOfMemoryError: Java heap space
+26/10/12 02:32:12 ERROR Executor: Exception in task 9.0 in stage 79.0 (TID 3177)
+java.lang.OutOfMemoryError: Java heap space
+26/10/12 02:32:14 ERROR SparkUncaughtExceptionHandler: Uncaught exception in thread Thread[Executor task launch worker for task 12.0 in stage 79.0 (TID 3180),5,main]
+java.lang.OutOfMemoryError: Java heap space
+26/10/12 02:32:14 ERROR SparkUncaughtExceptionHandler: Uncaught exception in thread Thread[Executor task launch worker for task 0.0 in stage 79.0 (TID 3168),5,main]
+java.lang.OutOfMemoryError: Java heap space
+26/10/12 02:32:14 ERROR SparkUncaughtExceptionHandler: Uncaught exception in thread Thread[Executor task launch worker for task 9.0 in stage 79.0 (TID 3177),5,main]
+java.lang.OutOfMemoryError: Java heap space
+26/10/12 02:32:14 ERROR SparkUncaughtExceptionHandler: Uncaught exception in thread Thread[Executor task launch worker for task 4.0 in stage 79.0 (TID 3172),5,main]
+java.lang.OutOfMemoryError: Java heap space
+26/10/12 02:32:14 ERROR SparkUncaughtExceptionHandler: Uncaught exception in thread Thread[Executor task launch worker for task 14.0 in stage 79.0 (TID 3182),5,main]
+java.lang.OutOfMemoryError: Java heap space
+26/10/12 02:32:17 ERROR Inbox: Ignoring error
+java.util.concurrent.RejectedExecutionException: Task org.apache.spark.executor.Executor$TaskRunner@3e1ebc19 rejected from java.util.concurrent.ThreadPoolExecutor@605c6359[Shutting down, pool size = 15, active threads = 15, queued tasks = 0, completed tasks = 3169]
+26/10/12 02:32:18 ERROR TaskSetManager: Task 12 in stage 79.0 failed 1 times; aborting job
+   (API REST no disponible al final: <urlopen error [Errno 111] Connection refused>)
+->   500X | filas=   22835500 |    66.41 s | mem pico contenedor=  2152 MiB | spill mem=   8020.0 MiB | spill disco=   224.7 MiB | OOM
+   Se detiene la prueba por OOM en 500X
+
+==============================================================================
+ TABLA FINAL: SPARK vs PANDAS
+==============================================================================
+Spark: modo local[16], heap del driver 1 GiB | pandas: contenedor con limite 4096 MiB
+escala        filas |   Spark s    mem MiB   spill mem  spill disk |  pandas s    RSS MiB pandas estado
+----------------------------------------------------------------------------------------------------------------
+1X           45,671 |      3.80       1142         0.0         0.0 |      0.31        166 OK
+10X         456,710 |      4.27       1665         0.0         0.0 |      2.81        556 OK
+100X      4,567,100 |     25.87       1955      3737.4       388.1 |         -          - OOM (proceso terminado por el kernel, SIGKILL)
+500X     22,835,500 |       OOM       2152      8020.0       224.7 |         -          - no ejecutado (se detuvo antes)
+1000X    45,671,000 |         -          -           -           - |         -          - no ejecutado (se detuvo antes)
+----------------------------------------------------------------------------------------------------------------
+PUNTO DE QUIEBRE pandas : 100X
+PUNTO DE QUIEBRE Spark  : 500X
+Etapa con mas spill a disco: stage 62 (escala 100X) -> http://localhost:4040/stages/stage/?id=62&attempt=0

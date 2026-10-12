@@ -1,0 +1,51 @@
+[
+ {
+  "escala": 1,
+  "filas": 45671,
+  "tiempo_s": 3.8,
+  "estado": "OK",
+  "mem_inicio_mib": 1055,
+  "mem_pico_mib": 1142,
+  "spill_mem_mib": 0.0,
+  "spill_disk_mib": 0.0,
+  "etapa_max_spill": null,
+  "etapas": 10
+ },
+ {
+  "escala": 10,
+  "filas": 456710,
+  "tiempo_s": 4.27,
+  "estado": "OK",
+  "mem_inicio_mib": 1290,
+  "mem_pico_mib": 1665,
+  "spill_mem_mib": 0.0,
+  "spill_disk_mib": 0.0,
+  "etapa_max_spill": null,
+  "etapas": 10
+ },
+ {
+  "escala": 100,
+  "filas": 4567100,
+  "tiempo_s": 25.87,
+  "estado": "OK",
+  "mem_inicio_mib": 1660,
+  "mem_pico_mib": 1955,
+  "spill_mem_mib": 3737.4,
+  "spill_disk_mib": 388.1,
+  "etapa_max_spill": 62,
+  "etapas": 10
+ },
+ {
+  "escala": 500,
+  "filas": 22835500,
+  "tiempo_s": 66.41,
+  "estado": "OOM",
+  "mem_inicio_mib": 1879,
+  "mem_pico_mib": 2152,
+  "spill_mem_mib": 8020.0,
+  "spill_disk_mib": 224.7,
+  "etapa_max_spill": 77,
+  "etapas": 3,
+  "nota_spill": "ultima lectura de la API antes del fallo"
+ }
+]

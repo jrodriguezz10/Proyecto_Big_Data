@@ -1,0 +1,9 @@
+==============================================================================
+ 5b. PRUEBA DE ESCALABILIDAD - PANDAS 2.3.3 | limite de memoria del contenedor: 4096 MiB
+==============================================================================
+filas base: 45671 | dimensiones: clima=342 peligros=1708 infra=1604
+->     1X | filas=      45671 | {'estado': 'OK', 'tiempo_s': 0.31, 'rss_pico_mib': 166, 'filas_resultado': 6547, 'escala': 1, 'filas': 45671}
+->    10X | filas=     456710 | {'estado': 'OK', 'tiempo_s': 2.81, 'rss_pico_mib': 556, 'filas_resultado': 6547, 'escala': 10, 'filas': 456710}
+->   100X | filas=    4567100 | {'estado': 'OOM (proceso terminado por el kernel, SIGKILL)', 'tiempo_hasta_fallo_s': 32.77, 'escala': 100, 'filas': 4567100}
+   pandas falla en 100X; se detiene.
+Resultados guardados en /app/evidencias/escalabilidad_pandas.json

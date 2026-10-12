@@ -1,0 +1,75 @@
+﻿
+==============================================================================
+ 2.1 INTERRUPCIONES (SUNASS)
+==============================================================================
+filas raw                                   : 45671
+tras dropDuplicates() (filas identicas)     : 45000  (-671)
+tras dropDuplicates(ID, depto, distrito)    : 44729  (-271)
+tras rechazar fecha invalida/distrito nulo  : 44541  (-188)
+
+==============================================================================
+ 2.2 CLIMA (SENAMHI): imputacion y agregacion distrito-mes
+==============================================================================
+filas raw: 416273 | tras dropDuplicates (estacion, fecha, hora): 416273 | con fecha valida: 416273
+PP nulo -> 0.0 (PP_IMPUTADO=1)              : 14440 registros horarios
+TEMP nulo -> mediana estacion-mes           : 13343 registros (nulos restantes: 0)
+clima distrito-mes: 570 filas (5 distritos con estacion)
++--------+--------------------+-----+--------------+-------------+----------+
+|DEPTO_N |DIST_N              |meses|PP_TOTAL_medio|PP_MAX_diario|dias_>15mm|
++--------+--------------------+-----+--------------+-------------+----------+
+|AREQUIPA|SAN ANTONIO DE CHUCA|114  |37.39         |43.0         |36.0      |
+|LIMA    |MATUCANA            |114  |27.99         |20.7         |12.0      |
+|AREQUIPA|POLOBAYA            |114  |35.4          |50.2         |79.0      |
+|LIMA    |CARANIA             |114  |43.58         |30.1         |25.0      |
+|TACNA   |CANDARAVE           |114  |12.55         |31.8         |10.0      |
++--------+--------------------+-----+--------------+-------------+----------+
+
+
+==============================================================================
+ 2.3 PELIGROS (INGEMMET) agregados por distrito ANTES del join
+==============================================================================
+filas raw: 37895 | validas y sin duplicados: 37787 (rechazadas 108 por fila mal formada/tipo invalido)
+distritos con peligros inventariados: 1707
+
+==============================================================================
+ 2.4 INFRAESTRUCTURA (DATASS): antiguedad y estado por distrito
+==============================================================================
+DATASS no trae la edad en anios: solo la categoria '<=20 anios' / '>20 anios' por sistema.
+Por eso la 'antiguedad promedio' se expresa como % de sistemas con mas de 20 anios.
+distritos con datos de infraestructura: 1653
+
+==============================================================================
+ 2.5 PANEL DISTRITO-MES (filas antes y despues de cada JOIN)
+==============================================================================
+distritos con interrupciones: 323 | meses 2019-06 a 2024-05: 60 | base = 19380 filas
+JOIN base x clima (depto-mes)           | izq=  19380 | der=   342 (claves unicas=   342) | resultado=  19380 | OK sin explosion
+JOIN x conteo interrupciones            | izq=  19380 | der=  6547 (claves unicas=  6547) | resultado=  19380 | OK sin explosion
+JOIN x peligros (broadcast)             | izq=  19380 | der=  1707 (claves unicas=  1707) | resultado=  19380 | OK sin explosion
+JOIN x infraestructura (broadcast)      | izq=  19380 | der=  1653 (claves unicas=  1653) | resultado=  19380 | OK sin explosion
+
+Panel final: 19380 filas x 27 columnas
++----------------------+------------------+-----------------------+---------------+---------------+
+|meses_con_interrupcion|prevalencia_TARGET|interrupciones_contadas|filas_con_clima|filas_con_infra|
++----------------------+------------------+-----------------------+---------------+---------------+
+|6547                  |0.3378            |44541                  |6180           |11460          |
++----------------------+------------------+-----------------------+---------------+---------------+
+
++------------+--------+-----------------+------------------+
+|distritos_LL|filas_LL|interrupciones_LL|filas_LL_con_clima|
++------------+--------+-----------------+------------------+
+|          13|     780|              514|                 0|
++------------+--------+-----------------+------------------+
+
+['DEPTO_N', 'DIST_N', 'ANIO', 'MES', 'PP_TOTAL', 'PP_MAX', 'DIAS_LLUVIA_ALTA', 'TEMP_MEDIA', 'PCT_PP_IMPUTADO', 'N_ESTACIONES', 'N_INTERRUPCIONES', 'N_IMPREVISTAS', 'N_PELIGROS', 'TIPO_PELIGRO_PRINCIPAL', 'N_SISTEMAS_AGUA', 'PCT_SIST_MAS_20_ANIOS', 'PCT_SIST_NO_OPERA', 'TARGET', 'CLIMA_DISPONIBLE', 'INFRA_DISPONIBLE', 'PERIODO', 'INT_LAG1', 'TARGET_LAG1', 'INT_PREV3', 'PP_TOTAL_LAG1', 'PP_MAX_LAG1', 'DIAS_LLUVIA_ALTA_LAG1']
+
+==============================================================================
+ 2.6 ESCRITURA PARQUET particionado por ANIO
+==============================================================================
+  DIR  hdfs://namenode:8020/datalake_sedalib/processed/master_panel.parquet/ANIO=2019
+  DIR  hdfs://namenode:8020/datalake_sedalib/processed/master_panel.parquet/ANIO=2020
+  DIR  hdfs://namenode:8020/datalake_sedalib/processed/master_panel.parquet/ANIO=2021
+  DIR  hdfs://namenode:8020/datalake_sedalib/processed/master_panel.parquet/ANIO=2022
+  DIR  hdfs://namenode:8020/datalake_sedalib/processed/master_panel.parquet/ANIO=2023
+  DIR  hdfs://namenode:8020/datalake_sedalib/processed/master_panel.parquet/ANIO=2024
+  FILE hdfs://namenode:8020/datalake_sedalib/processed/master_panel.parquet/_SUCCESS
+Verificacion de lectura: 19380 filas

@@ -1,0 +1,27 @@
+# Datos: no se versionan (ver data/README.md)
+data/raw/
+raw/
+processed/
+*.parquet
+*.csv
+!evidencias/*.csv
+*.xlsx
+
+# Python / entorno
+__pycache__/
+*.pyc
+.env
+.env.*
+.venv/
+
+# Credenciales
+*.pem
+*.key
+*credential*
+*secret*
+*token*
+
+# Otros
+capturas.zip
+obsoleto/
+evidencias/.liberar_ui

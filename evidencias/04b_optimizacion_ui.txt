@@ -1,0 +1,153 @@
+Using Spark's default log4j profile: org/apache/spark/log4j-defaults.properties
+26/10/12 02:20:30 INFO SparkContext: Running Spark version 3.2.1
+26/10/12 02:20:30 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+26/10/12 02:20:30 INFO ResourceUtils: ==============================================================
+26/10/12 02:20:30 INFO ResourceUtils: No custom resources configured for spark.driver.
+26/10/12 02:20:30 INFO ResourceUtils: ==============================================================
+26/10/12 02:20:30 INFO SparkContext: Submitted application: SEDALIB_Optimizacion
+26/10/12 02:20:30 INFO ResourceProfile: Default ResourceProfile created, executor resources: Map(cores -> name: cores, amount: 1, script: , vendor: , memory -> name: memory, amount: 1024, script: , vendor: , offHeap -> name: offHeap, amount: 0, script: , vendor: ), task resources: Map(cpus -> name: cpus, amount: 1.0)
+26/10/12 02:20:30 INFO ResourceProfile: Limiting resource is cpu
+26/10/12 02:20:30 INFO ResourceProfileManager: Added ResourceProfile id: 0
+26/10/12 02:20:30 INFO SecurityManager: Changing view acls to: root
+26/10/12 02:20:30 INFO SecurityManager: Changing modify acls to: root
+26/10/12 02:20:30 INFO SecurityManager: Changing view acls groups to: 
+26/10/12 02:20:30 INFO SecurityManager: Changing modify acls groups to: 
+26/10/12 02:20:30 INFO SecurityManager: SecurityManager: authentication disabled; ui acls disabled; users  with view permissions: Set(root); groups with view permissions: Set(); users  with modify permissions: Set(root); groups with modify permissions: Set()
+26/10/12 02:20:31 INFO Utils: Successfully started service 'sparkDriver' on port 35495.
+26/10/12 02:20:31 INFO SparkEnv: Registering MapOutputTracker
+26/10/12 02:20:31 INFO SparkEnv: Registering BlockManagerMaster
+26/10/12 02:20:31 INFO BlockManagerMasterEndpoint: Using org.apache.spark.storage.DefaultTopologyMapper for getting topology information
+26/10/12 02:20:31 INFO BlockManagerMasterEndpoint: BlockManagerMasterEndpoint up
+26/10/12 02:20:31 INFO SparkEnv: Registering BlockManagerMasterHeartbeat
+26/10/12 02:20:31 INFO DiskBlockManager: Created local directory at /tmp/blockmgr-c508d5dc-595c-4b71-9c6f-4bda12844033
+26/10/12 02:20:31 INFO MemoryStore: MemoryStore started with capacity 366.3 MiB
+26/10/12 02:20:31 INFO SparkEnv: Registering OutputCommitCoordinator
+26/10/12 02:20:31 INFO Utils: Successfully started service 'SparkUI' on port 4040.
+26/10/12 02:20:31 INFO SparkUI: Bound SparkUI to 0.0.0.0, and started at http://d5e822784512:4040
+26/10/12 02:20:31 INFO Executor: Starting executor ID driver on host d5e822784512
+26/10/12 02:20:31 INFO Utils: Successfully started service 'org.apache.spark.network.netty.NettyBlockTransferService' on port 44809.
+26/10/12 02:20:31 INFO NettyBlockTransferService: Server created on d5e822784512:44809
+26/10/12 02:20:31 INFO BlockManager: Using org.apache.spark.storage.RandomBlockReplicationPolicy for block replication policy
+26/10/12 02:20:31 INFO BlockManagerMaster: Registering BlockManager BlockManagerId(driver, d5e822784512, 44809, None)
+26/10/12 02:20:31 INFO BlockManagerMasterEndpoint: Registering block manager d5e822784512:44809 with 366.3 MiB RAM, BlockManagerId(driver, d5e822784512, 44809, None)
+26/10/12 02:20:31 INFO BlockManagerMaster: Registered BlockManager BlockManagerId(driver, d5e822784512, 44809, None)
+26/10/12 02:20:31 INFO BlockManager: Initialized BlockManager: BlockManagerId(driver, d5e822784512, 44809, None)
+26/10/12 02:20:32 INFO SharedState: Setting hive.metastore.warehouse.dir ('null') to the value of spark.sql.warehouse.dir.
+26/10/12 02:20:32 INFO SharedState: Warehouse path is 'file:/spark-warehouse'.
+
+==============================================================================
+ 4. PRUEBA DE RENDIMIENTO: SortMergeJoin vs BroadcastHashJoin
+==============================================================================
+Filas de entrada (materializadas): {'interrupciones': 44541, 'clima depto-mes': 342, 'peligros por distrito': 1707, 'infraestructura por distrito': 1604}
+spark.sql.autoBroadcastJoinThreshold = -1 | AQE = true | cores = 16
+   A_SortMerge_200part    calentamiento    1.530 s  (6547 filas resultado)
+   A_SortMerge_200part    corrida 1        0.568 s  (6547 filas resultado)
+   A_SortMerge_200part    corrida 2        0.575 s  (6547 filas resultado)
+   A_SortMerge_200part    corrida 3        0.483 s  (6547 filas resultado)
+   B_Broadcast_200part    calentamiento    0.473 s  (6547 filas resultado)
+   B_Broadcast_200part    corrida 1        0.303 s  (6547 filas resultado)
+   B_Broadcast_200part    corrida 2        0.286 s  (6547 filas resultado)
+   B_Broadcast_200part    corrida 3        0.257 s  (6547 filas resultado)
+   C_SortMerge_16part     calentamiento    0.317 s  (6547 filas resultado)
+   C_SortMerge_16part     corrida 1        0.291 s  (6547 filas resultado)
+   C_SortMerge_16part     corrida 2        0.289 s  (6547 filas resultado)
+   C_SortMerge_16part     corrida 3        0.293 s  (6547 filas resultado)
+   D_Broadcast_16part     calentamiento    0.182 s  (6547 filas resultado)
+   D_Broadcast_16part     corrida 1        0.185 s  (6547 filas resultado)
+   D_Broadcast_16part     corrida 2        0.174 s  (6547 filas resultado)
+   D_Broadcast_16part     corrida 3        0.166 s  (6547 filas resultado)
+
+==============================================================================
+ explain() plan fisico final - A_SortMerge_200part
+==============================================================================
+== Physical Plan ==
+AdaptiveSparkPlan isFinalPlan=true
++- == Final Plan ==
+   *(12) HashAggregate(keys=[DEPTO_N#32, DIST_N#50, ANIO#89, MES#110], functions=[count(1), avg(PP_TOTAL#238), max(N_PELIGROS#388L), max(PCT_MAS_20#478)])
+   +- *(12) HashAggregate(keys=[DEPTO_N#32, DIST_N#50, ANIO#89, MES#110], functions=[partial_count(1), partial_avg(PP_TOTAL#238), partial_max(N_PELIGROS#388L), partial_max(PCT_MAS_20#478)])
+      +- *(12) Project [DEPTO_N#32, DIST_N#50, ANIO#89, MES#110, PP_TOTAL#238, N_PELIGROS#388L, PCT_MAS_20#478]
+         +- *(12) SortMergeJoin [DEPTO_N#32, DIST_N#50], [DEPTO_N#428, DIST_N#444], LeftOuter
+            :- *(10) Project [DEPTO_N#32, DIST_N#50, ANIO#89, MES#110, PP_TOTAL#238, N_PELIGROS#388L]
+            :  +- *(10) SortMergeJoin [DEPTO_N#32, DIST_N#50], [DEPTO_N#303, DIST_N#323], LeftOuter
+            :     :- *(8) Sort [DEPTO_N#32 ASC NULLS FIRST, DIST_N#50 ASC NULLS FIRST], false, 0
+            :     :  +- AQEShuffleRead coalesced
+            :     :     +- ShuffleQueryStage 4
+            :     :        +- Exchange hashpartitioning(DEPTO_N#32, DIST_N#50, 200), ENSURE_REQUIREMENTS, [id=#2016]
+            :     :           +- *(7) Project [DEPTO_N#32, ANIO#89, MES#110, DIST_N#50, PP_TOTAL#238]
+            :     :              +- *(7) SortMergeJoin [DEPTO_N#32, ANIO#89, MES#110], [DEPTO_N#210, ANIO#212, MES#213], LeftOuter
+            :     :                 :- *(5) Sort [DEPTO_N#32 ASC NULLS FIRST, ANIO#89 ASC NULLS FIRST, MES#110 ASC NULLS FIRST], false, 0
+            :     :                 :  +- AQEShuffleRead coalesced
+            :     :                 :     +- ShuffleQueryStage 0
+            :     :                 :        +- Exchange hashpartitioning(DEPTO_N#32, ANIO#89, MES#110, 200), ENSURE_REQUIREMENTS, [id=#1794]
+            :     :                 :           +- *(1) Project [DEPTO_N#32, DIST_N#50, ANIO#89, MES#110]
+            :     :                 :              +- *(1) Scan ExistingRDD[IDINTERRUPCION#0,TIPOINTERRUPCION#3,DEPTO_N#32,DIST_N#50,ANIO#89,MES#110]
+            :     :                 +- *(6) Sort [DEPTO_N#210 ASC NULLS FIRST, ANIO#212 ASC NULLS FIRST, MES#213 ASC NULLS FIRST], false, 0
+            :     :                    +- AQEShuffleRead coalesced
+            :     :                       +- ShuffleQueryStage 1
+            :     :                          +- Exchange hashpartitioning(DEPTO_N#210, ANIO#212, MES#213, 200), ENSURE_REQUIREMENTS, [id=#1801]
+            :     :                             +- *(2) Project [DEPTO_N#210, ANIO#212, MES#213, PP_TOTAL#238]
+            :     :                                +- *(2) Filter ((isnotnull(DEPTO_N#210) AND isnotnull(ANIO#212)) AND isnotnull(MES#213))
+            :     :                                   +- *(2) Scan ExistingRDD[DEPTO_N#210,ANIO#212,MES#213,PP_TOTAL#238,DIAS_LLUVIA_ALTA#240]
+            :     +- *(9) Sort [DEPTO_N#303 ASC NULLS FIRST, DIST_N#323 ASC NULLS FIRST], false, 0
+            :        +- AQEShuffleRead coalesced
+            :           +- ShuffleQueryStage 2
+            :              +- Exchange hashpartitioning(DEPTO_N#303, DIST_N#323, 200), ENSURE_REQUIREMENTS, [id=#1817]
+            :                 +- *(3) Filter (isnotnull(DEPTO_N#303) AND isnotnull(DIST_N#323))
+            :                    +- *(3) Scan ExistingRDD[DEPTO_N#303,DIST_N#323,N_PELIGROS#388L]
+            +- *(11) Sort [DEPTO_N#428 ASC NULLS FIRST, DIST_N#444 ASC NULLS FIRST], false, 0
+               +- AQEShuffleRead coalesced
+                  +- ShuffleQueryStage 3
+                     +- Exchange hashpartitioning(DEPTO_N#428, DIST_N#444, 200), ENSURE_REQUIREMENTS, [id=#1831]
+                        +- *(4) Filter (isnotnull(DEPTO_N#428) AND isnotnull(DIST_N#444))
+                           +- *(4) Scan ExistingRDD[DEPTO_N#428,DIST_N#444,PCT_MAS_20#478]
+
+
+==============================================================================
+ explain() plan fisico final - B_Broadcast_200part
+==============================================================================
+== Physical Plan ==
+AdaptiveSparkPlan isFinalPlan=true
++- == Final Plan ==
+   *(5) HashAggregate(keys=[DEPTO_N#32, DIST_N#50, ANIO#89, MES#110], functions=[count(1), avg(PP_TOTAL#238), max(N_PELIGROS#388L), max(PCT_MAS_20#478)])
+   +- AQEShuffleRead coalesced
+      +- ShuffleQueryStage 3
+         +- Exchange hashpartitioning(DEPTO_N#32, DIST_N#50, ANIO#89, MES#110, 200), ENSURE_REQUIREMENTS, [id=#3186]
+            +- *(4) HashAggregate(keys=[DEPTO_N#32, DIST_N#50, ANIO#89, MES#110], functions=[partial_count(1), partial_avg(PP_TOTAL#238), partial_max(N_PELIGROS#388L), partial_max(PCT_MAS_20#478)])
+               +- *(4) Project [DEPTO_N#32, DIST_N#50, ANIO#89, MES#110, PP_TOTAL#238, N_PELIGROS#388L, PCT_MAS_20#478]
+                  +- *(4) BroadcastHashJoin [DEPTO_N#32, DIST_N#50], [DEPTO_N#428, DIST_N#444], LeftOuter, BuildRight, false
+                     :- *(4) Project [DEPTO_N#32, DIST_N#50, ANIO#89, MES#110, PP_TOTAL#238, N_PELIGROS#388L]
+                     :  +- *(4) BroadcastHashJoin [DEPTO_N#32, DIST_N#50], [DEPTO_N#303, DIST_N#323], LeftOuter, BuildRight, false
+                     :     :- *(4) Project [DEPTO_N#32, ANIO#89, MES#110, DIST_N#50, PP_TOTAL#238]
+                     :     :  +- *(4) BroadcastHashJoin [DEPTO_N#32, ANIO#89, MES#110], [DEPTO_N#210, ANIO#212, MES#213], LeftOuter, BuildRight, false
+                     :     :     :- *(4) Project [DEPTO_N#32, DIST_N#50, ANIO#89, MES#110]
+                     :     :     :  +- *(4) Scan ExistingRDD[IDINTERRUPCION#0,TIPOINTERRUPCION#3,DEPTO_N#32,DIST_N#50,ANIO#89,MES#110]
+                     :     :     +- BroadcastQueryStage 0
+                     :     :        +- BroadcastExchange HashedRelationBroadcastMode(List(input[0, string, true], input[1, int, true], input[2, int, true]),false), [id=#3064]
+                     :     :           +- *(1) Project [DEPTO_N#210, ANIO#212, MES#213, PP_TOTAL#238]
+                     :     :              +- *(1) Filter ((isnotnull(DEPTO_N#210) AND isnotnull(ANIO#212)) AND isnotnull(MES#213))
+                     :     :                 +- *(1) Scan ExistingRDD[DEPTO_N#210,ANIO#212,MES#213,PP_TOTAL#238,DIAS_LLUVIA_ALTA#240]
+                     :     +- BroadcastQueryStage 1
+                     :        +- BroadcastExchange HashedRelationBroadcastMode(List(input[0, string, false], input[1, string, false]),false), [id=#3071]
+                     :           +- *(2) Filter (isnotnull(DEPTO_N#303) AND isnotnull(DIST_N#323))
+                     :              +- *(2) Scan ExistingRDD[DEPTO_N#303,DIST_N#323,N_PELIGROS#388L]
+                     +- BroadcastQueryStage 2
+                        +- BroadcastExchange HashedRelationBroadcastMode(List(input[0, string, false], input[1, string, false]),false), [id=#3078]
+                           +- *(3) Filter (isnotnull(DEPTO_N#428) AND isnotnull(DIST_N#444))
+                              +- *(3) Scan ExistingRDD[DEPTO_N#428,DIST_N#444,PCT_MAS_20#478]
+
+
+==============================================================================
+ RESUMEN (mediana de 3 corridas, tras 1 de calentamiento)
+==============================================================================
+modo                   corridas (s)                  mediana  joins en el plan final
+A_SortMerge_200part    0.568, 0.575, 0.483           0.568 s  {'SortMergeJoin': 3}
+B_Broadcast_200part    0.303, 0.286, 0.257           0.286 s  {'BroadcastHashJoin': 3}
+C_SortMerge_16part     0.291, 0.289, 0.293           0.291 s  {'SortMergeJoin': 3}
+D_Broadcast_16part     0.185, 0.174, 0.166           0.174 s  {'BroadcastHashJoin': 3}
+
+Variacion respecto a la linea base A (negativo = mas lento):
+   B_Broadcast_200part     +49.6 %  (0.568 s -> 0.286 s, speedup 1.98x)
+   C_SortMerge_16part      +48.7 %  (0.568 s -> 0.291 s, speedup 1.95x)
+   D_Broadcast_16part      +69.3 %  (0.568 s -> 0.174 s, speedup 3.26x)
+
+Spark UI disponible en http://localhost:4040/SQL/ durante 600 s

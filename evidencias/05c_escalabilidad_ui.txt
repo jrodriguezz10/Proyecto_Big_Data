@@ -1,0 +1,60 @@
+Using Spark's default log4j profile: org/apache/spark/log4j-defaults.properties
+26/10/12 02:23:29 INFO SparkContext: Running Spark version 3.2.1
+26/10/12 02:23:29 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+26/10/12 02:23:29 INFO ResourceUtils: ==============================================================
+26/10/12 02:23:29 INFO ResourceUtils: No custom resources configured for spark.driver.
+26/10/12 02:23:29 INFO ResourceUtils: ==============================================================
+26/10/12 02:23:29 INFO SparkContext: Submitted application: SEDALIB_Escalabilidad
+26/10/12 02:23:29 INFO ResourceProfile: Default ResourceProfile created, executor resources: Map(cores -> name: cores, amount: 1, script: , vendor: , memory -> name: memory, amount: 1024, script: , vendor: , offHeap -> name: offHeap, amount: 0, script: , vendor: ), task resources: Map(cpus -> name: cpus, amount: 1.0)
+26/10/12 02:23:29 INFO ResourceProfile: Limiting resource is cpu
+26/10/12 02:23:29 INFO ResourceProfileManager: Added ResourceProfile id: 0
+26/10/12 02:23:30 INFO SecurityManager: Changing view acls to: root
+26/10/12 02:23:30 INFO SecurityManager: Changing modify acls to: root
+26/10/12 02:23:30 INFO SecurityManager: Changing view acls groups to: 
+26/10/12 02:23:30 INFO SecurityManager: Changing modify acls groups to: 
+26/10/12 02:23:30 INFO SecurityManager: SecurityManager: authentication disabled; ui acls disabled; users  with view permissions: Set(root); groups with view permissions: Set(); users  with modify permissions: Set(root); groups with modify permissions: Set()
+26/10/12 02:23:30 INFO Utils: Successfully started service 'sparkDriver' on port 41851.
+26/10/12 02:23:30 INFO SparkEnv: Registering MapOutputTracker
+26/10/12 02:23:30 INFO SparkEnv: Registering BlockManagerMaster
+26/10/12 02:23:30 INFO BlockManagerMasterEndpoint: Using org.apache.spark.storage.DefaultTopologyMapper for getting topology information
+26/10/12 02:23:30 INFO BlockManagerMasterEndpoint: BlockManagerMasterEndpoint up
+26/10/12 02:23:30 INFO SparkEnv: Registering BlockManagerMasterHeartbeat
+26/10/12 02:23:30 INFO DiskBlockManager: Created local directory at /tmp/blockmgr-dd6df3c5-eb81-4734-844d-7b7a85b94d68
+26/10/12 02:23:30 INFO MemoryStore: MemoryStore started with capacity 366.3 MiB
+26/10/12 02:23:30 INFO SparkEnv: Registering OutputCommitCoordinator
+26/10/12 02:23:30 INFO Utils: Successfully started service 'SparkUI' on port 4040.
+26/10/12 02:23:30 INFO SparkUI: Bound SparkUI to 0.0.0.0, and started at http://d5e822784512:4040
+26/10/12 02:23:30 INFO Executor: Starting executor ID driver on host d5e822784512
+26/10/12 02:23:30 INFO Utils: Successfully started service 'org.apache.spark.network.netty.NettyBlockTransferService' on port 42571.
+26/10/12 02:23:30 INFO NettyBlockTransferService: Server created on d5e822784512:42571
+26/10/12 02:23:30 INFO BlockManager: Using org.apache.spark.storage.RandomBlockReplicationPolicy for block replication policy
+26/10/12 02:23:30 INFO BlockManagerMaster: Registering BlockManager BlockManagerId(driver, d5e822784512, 42571, None)
+26/10/12 02:23:30 INFO BlockManagerMasterEndpoint: Registering block manager d5e822784512:42571 with 366.3 MiB RAM, BlockManagerId(driver, d5e822784512, 42571, None)
+26/10/12 02:23:30 INFO BlockManagerMaster: Registered BlockManager BlockManagerId(driver, d5e822784512, 42571, None)
+26/10/12 02:23:31 INFO BlockManager: Initialized BlockManager: BlockManagerId(driver, d5e822784512, 42571, None)
+26/10/12 02:23:31 INFO SharedState: Setting hive.metastore.warehouse.dir ('null') to the value of spark.sql.warehouse.dir.
+26/10/12 02:23:31 INFO SharedState: Warehouse path is 'file:/spark-warehouse'.
+
+==============================================================================
+ 5. PRUEBA DE ESCALABILIDAD - SPARK (modo local)
+==============================================================================
+cores=16 | spark.driver.memory=1g (por defecto) | shuffle.partitions=200 | filas base=45671
+->     1X | filas=      45671 |     5.05 s | mem pico contenedor=  1175 MiB | spill mem=      0.0 MiB | spill disco=     0.0 MiB | OK
+->    10X | filas=     456710 |     5.14 s | mem pico contenedor=  1636 MiB | spill mem=      0.0 MiB | spill disco=     0.0 MiB | OK
+->   100X | filas=    4567100 |    28.51 s | mem pico contenedor=  1961 MiB | spill mem=   3737.4 MiB | spill disco=   388.1 MiB | OK
+
+==============================================================================
+ TABLA FINAL: SPARK vs PANDAS
+==============================================================================
+Spark: modo local[16], heap del driver 1 GiB | pandas: contenedor con limite 4096 MiB
+escala        filas |   Spark s    mem MiB   spill mem  spill disk |  pandas s    RSS MiB pandas estado
+----------------------------------------------------------------------------------------------------------------
+1X           45,671 |      5.05       1175         0.0         0.0 |      0.31        166 OK
+10X         456,710 |      5.14       1636         0.0         0.0 |      2.81        556 OK
+100X      4,567,100 |     28.51       1961      3737.4       388.1 |         -          - OOM (proceso terminado por el kernel, SIGKILL)
+----------------------------------------------------------------------------------------------------------------
+PUNTO DE QUIEBRE pandas : 100X
+PUNTO DE QUIEBRE Spark  : no se alcanzo (completo hasta 100X)
+Etapa con mas spill a disco: stage 62 (escala 100X) -> http://localhost:4040/stages/stage/?id=62&attempt=0
+
+Spark UI disponible en http://localhost:4040/stages/ durante 600 s

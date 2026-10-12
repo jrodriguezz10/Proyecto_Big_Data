@@ -1,0 +1,35 @@
+﻿g1 - Interrupciones por distrito de La Libertad (2019-06 a 2024-05)
+   TRUJILLO               interrupciones= 226 imprevistas=  96 meses_con_int= 32 tasa=53.33 %
+   MOCHE                  interrupciones=  74 imprevistas=  13 meses_con_int= 15 tasa=25.0 %
+   EL PORVENIR            interrupciones=  51 imprevistas=  17 meses_con_int= 16 tasa=26.67 %
+   SALAVERRY              interrupciones=  37 imprevistas=  18 meses_con_int= 13 tasa=21.67 %
+   LA ESPERANZA           interrupciones=  31 imprevistas=   4 meses_con_int= 11 tasa=18.33 %
+   VICTOR LARCO HERRERA   interrupciones=  31 imprevistas=  19 meses_con_int= 14 tasa=23.33 %
+   HUANCHACO              interrupciones=  27 imprevistas=   6 meses_con_int= 11 tasa=18.33 %
+   FLORENCIA DE MORA      interrupciones=  20 imprevistas=   6 meses_con_int=  8 tasa=13.33 %
+   CHEPEN                 interrupciones=   9 imprevistas=   6 meses_con_int=  3 tasa=5.0 %
+   PAIJAN                 interrupciones=   4 imprevistas=   2 meses_con_int=  2 tasa=3.33 %
+   SIMBAL                 interrupciones=   2 imprevistas=   1 meses_con_int=  2 tasa=3.33 %
+   CHOCOPE                interrupciones=   1 imprevistas=   0 meses_con_int=  1 tasa=1.67 %
+   RAZURI                 interrupciones=   1 imprevistas=   0 meses_con_int=  1 tasa=1.67 %
+
+g2 - Tasa de interrupcion por rango de PP_TOTAL mensual (LIMA, AREQUIPA, TACNA; sin La Libertad)
+   0 mm       distrito-meses=  549 meses_con_int=  216 tasa= 39.34 %
+   0-10 mm    distrito-meses= 2344 meses_con_int= 1183 tasa= 50.47 %
+   10-25 mm   distrito-meses=  840 meses_con_int=  488 tasa=  58.1 %
+   25-50 mm   distrito-meses=  654 meses_con_int=  381 tasa= 58.26 %
+   50-100 mm  distrito-meses= 1109 meses_con_int=  670 tasa= 60.41 %
+   >100 mm    distrito-meses=  684 meses_con_int=  395 tasa= 57.75 %
+
+g3 - Tasa de interrupcion por cantidad de peligros INGEMMET en el distrito
+   LA LIBERTAD     0      distritos=   3 distrito-meses=  180 tasa= 22.78 %
+   LA LIBERTAD     1-5    distritos=   7 distrito-meses=  420 tasa= 17.14 %
+   LA LIBERTAD     6-20   distritos=   1 distrito-meses=   60 tasa= 18.33 %
+   LA LIBERTAD     21-50  distritos=   2 distrito-meses=  120 tasa=  4.17 %
+   RESTO DEL PAIS  0      distritos=  34 distrito-meses= 2040 tasa=  42.5 %
+   RESTO DEL PAIS  1-5    distritos=  68 distrito-meses= 4080 tasa= 31.18 %
+   RESTO DEL PAIS  6-20   distritos=  91 distrito-meses= 5460 tasa= 32.42 %
+   RESTO DEL PAIS  21-50  distritos=  75 distrito-meses= 4500 tasa= 32.38 %
+   RESTO DEL PAIS  >50    distritos=  42 distrito-meses= 2520 tasa= 41.75 %
+
+PNG generados: g1_distritos_la_libertad.png, g2_tasa_por_precipitacion.png, g3_tasa_por_peligros.png

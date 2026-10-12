@@ -1,0 +1,38 @@
+[
+ {
+  "escala": 1,
+  "filas": 45671,
+  "tiempo_s": 5.05,
+  "estado": "OK",
+  "mem_inicio_mib": 1078,
+  "mem_pico_mib": 1175,
+  "spill_mem_mib": 0.0,
+  "spill_disk_mib": 0.0,
+  "etapa_max_spill": null,
+  "etapas": 10
+ },
+ {
+  "escala": 10,
+  "filas": 456710,
+  "tiempo_s": 5.14,
+  "estado": "OK",
+  "mem_inicio_mib": 1167,
+  "mem_pico_mib": 1636,
+  "spill_mem_mib": 0.0,
+  "spill_disk_mib": 0.0,
+  "etapa_max_spill": null,
+  "etapas": 10
+ },
+ {
+  "escala": 100,
+  "filas": 4567100,
+  "tiempo_s": 28.51,
+  "estado": "OK",
+  "mem_inicio_mib": 1630,
+  "mem_pico_mib": 1961,
+  "spill_mem_mib": 3737.4,
+  "spill_disk_mib": 388.1,
+  "etapa_max_spill": 62,
+  "etapas": 10
+ }
+]

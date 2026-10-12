@@ -1,0 +1,3 @@
+datass_antiguedad.xlsx -> datass_antiguedad.csv | filas=21171 columnas=14
+datass_estado.xlsx -> datass_estado.csv | filas=11444 columnas=14
+CSV subidos a hdfs:///datalake_sedalib/raw/infraestructura/

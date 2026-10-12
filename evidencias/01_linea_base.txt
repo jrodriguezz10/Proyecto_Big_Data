@@ -1,0 +1,98 @@
+
+==============================================================================
+ 1.1 AGUA NO FACTURADA (sunass_anf.csv)
+==============================================================================
+Columnas disponibles: ['EPS', 'GRUPO_EPS', 'REGION', 'AGUA_NO_FACTURADA_PORCENTAJE']
++------------+---------+-----------+----------------------------+
+|EPS         |GRUPO_EPS|REGION     |AGUA_NO_FACTURADA_PORCENTAJE|
++------------+---------+-----------+----------------------------+
+|SEDALIB S.A.|Grande 1 |LA LIBERTAD|38.0                        |
++------------+---------+-----------+----------------------------+
+
++-------------------+----+-----+
+|ANF_promedio_16_EPS| min|  max|
++-------------------+----+-----+
+|              41.59|29.5|60.79|
++-------------------+----+-----+
+
+ANIO del indicador : NO EXISTE en el archivo (no hay columna de anio/periodo).
+Volumen ANF (m3)   : NO EXISTE en el archivo (solo trae el porcentaje).
+
+==============================================================================
+ 1.2 INTERRUPCIONES DE SEDALIB
+==============================================================================
+Filas SEDALIB (sin filas identicas): 516 | eventos (IDINTERRUPCION distintos): 516
+Rango de fechas: Row(min(F_INI)=datetime.date(2020, 4, 21), max(F_INI)=datetime.date(2024, 5, 1))
+
+Interrupciones de SEDALIB por anio (eventos distintos):
++----+-------+---------------------+
+|ANIO|eventos|filas_evento_distrito|
++----+-------+---------------------+
+|2020|     12|                   12|
+|2021|      7|                    7|
+|2022|    140|                  140|
+|2023|    245|                  245|
+|2024|    112|                  112|
++----+-------+---------------------+
+
+Nota: 2019 sin registros de SEDALIB y 2024 solo hasta mayo (corte del archivo).
+
+==============================================================================
+ 1.3 TIEMPO DE RESPUESTA (por evento)
+==============================================================================
++-----------------------------+----------+--------+----------------------+-----------+
+|mediana_TIEMPO_RESPUESTA_DIAS|media_dias|max_dias|mediana_DURACION_HORAS|media_horas|
++-----------------------------+----------+--------+----------------------+-----------+
+|0.0                          |0.618     |33      |14.666666666666666    |18.77      |
++-----------------------------+----------+--------+----------------------+-----------+
+
+TIEMPO_RESPUESTA_DIAS = FECHAFIN - FECHAINICIO (dias calendario); DURACION_HORAS usa tambien HORAINICIO/HORAFIN.
++---------------------+-----+
+|TIEMPO_RESPUESTA_DIAS|count|
++---------------------+-----+
+|                    0|  278|
+|                    1|  201|
+|                    2|   30|
+|                    3|    4|
+|                    5|    1|
+|                    8|    1|
+|                   33|    1|
++---------------------+-----+
+
+
+==============================================================================
+ 1.4 PROGRAMADAS vs IMPREVISTAS (columna TIPOINTERRUPCION)
+==============================================================================
++----------------+-----+-----+
+|TIPOINTERRUPCION|count|  pct|
++----------------+-----+-----+
+|      PROGRAMADA|  327|63.37|
+|      IMPREVISTA|  189|36.63|
++----------------+-----+-----+
+
++----+----------------+-----+
+|ANIO|TIPOINTERRUPCION|count|
++----+----------------+-----+
+|2020|      IMPREVISTA|   12|
+|2021|      IMPREVISTA|    5|
+|2021|      PROGRAMADA|    2|
+|2022|      IMPREVISTA|   21|
+|2022|      PROGRAMADA|  119|
+|2023|      IMPREVISTA|   64|
+|2023|      PROGRAMADA|  181|
+|2024|      IMPREVISTA|   87|
+|2024|      PROGRAMADA|   25|
++----+----------------+-----+
+
+Top 5 motivos de interrupcion SEDALIB:
++----------------------------------------------+-----+
+|MOTIVOINTERRUPCION                            |count|
++----------------------------------------------+-----+
+|OTROS                                         |276  |
+|LIMPIEZA Y DESINFECCIÓN DE RESERVORIO/CISTERNA|100  |
+|ROTURA DE TUBERÍA DE AGUA POTABLE             |70   |
+|TRABAJOS DE MEJORAMIENTO/REHABILITACIÓN       |20   |
+|ROTURA DE TUBERÍA POR TERCERO                 |11   |
++----------------------------------------------+-----+
+only showing top 5 rows
+

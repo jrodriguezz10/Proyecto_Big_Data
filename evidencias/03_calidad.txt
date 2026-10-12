@@ -1,0 +1,56 @@
+﻿
+==============================================================================
+ REPORTE DE CALIDAD DE DATOS - DATALAKE SEDALIB
+==============================================================================
+R1 UNICIDAD
+   interrupciones: 45671 filas | filas identicas eliminadas: 671 | duplicados (ID, depto, distrito): 271
+   IDINTERRUPCION que afectan a >1 distrito (se conservan, no son duplicados): 601
+   clima: duplicados (estacion, fecha, hora): 0 de 416273
+
+R2 COMPLETITUD (nulos en columnas clave)
+   interrupciones  IDINTERRUPCION  nulos=      0 ( 0.00 %)
+   interrupciones  FECHAINICIO     nulos=      0 ( 0.00 %)
+   interrupciones  FECHAFIN        nulos=      0 ( 0.00 %)
+   interrupciones  DISTRITO        nulos=    188 ( 0.41 %)
+   clima           FECHA           nulos=      0 ( 0.00 %)
+   clima           PP              nulos=  14440 ( 3.47 %)
+   clima           TEMP            nulos=  13343 ( 3.21 %)
+   clima           HR              nulos=  14121 ( 3.39 %)
+   Accion: DISTRITO nulo -> fila rechazada; PP nulo -> 0.0 con PP_IMPUTADO=1; TEMP nulo -> mediana estacion-mes.
+
+R3 FECHAS INVALIDAS (rechazadas)
+   interrupciones FECHAINICIO no parseable (yyyyMMdd): 0
+   interrupciones FECHAFIN no parseable (yyyyMMdd)   : 0
+   interrupciones con FECHAFIN < FECHAINICIO         : 0
+   clima FECHA no parseable (yyyyMMdd)               : 0
+   peligros FECHA no parseable (dd/MM/yyyy)          : 0 (no se usa en el panel)
+
+R4 INTEGRIDAD REFERENCIAL de distritos (base: 323 pares depto-distrito de interrupciones)
+   peligros INGEMMET (depto+distrito)          286 / 323 =  88.54 %
+   infraestructura DATASS (depto+distrito)     191 / 323 =  59.13 %
+   clima SENAMHI (depto+distrito)                0 / 323 =   0.00 %
+   clima SENAMHI (solo departamento)           103 / 323 =  31.89 %
+
+R5 RANGO DE PRECIPITACION (0 <= PP <= 500 mm)
+   registros horarios fuera de rango: 0 de 416273 (min=0.0, max=32.5)
+   dias-estacion fuera de rango     : 0 de 17345
+
+==============================================================================
+ VERIFICACION DE CARDINALIDAD DE LOS JOINs (panel master_panel.parquet)
+==============================================================================
+   filas del panel                          : 19380
+   claves unicas (depto, distrito, anio, mes): 19380 -> OK 1 fila por clave
+   distritos x meses = 323 x 60 = 19380 -> OK
+   suma N_INTERRUPCIONES en panel = 44541 | interrupciones limpias = 44541 -> OK no se pierden ni duplican
+   filas por departamento (top 5):
++----------+-----+
+|   DEPTO_N|count|
++----------+-----+
+|      LIMA| 3780|
+|  AREQUIPA| 2040|
+|LAMBAYEQUE| 1680|
+|     PIURA| 1620|
+|       ICA| 1200|
++----------+-----+
+only showing top 5 rows
+

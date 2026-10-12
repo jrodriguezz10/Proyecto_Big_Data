@@ -1,0 +1,115 @@
+﻿
+==============================================================================
+ 4. PRUEBA DE RENDIMIENTO: SortMergeJoin vs BroadcastHashJoin
+==============================================================================
+Filas de entrada (materializadas): {'interrupciones': 44541, 'clima depto-mes': 342, 'peligros por distrito': 1707, 'infraestructura por distrito': 1604}
+spark.sql.autoBroadcastJoinThreshold = -1 | AQE = true | cores = 16
+   A_SortMerge_200part    calentamiento    1.140 s  (6547 filas resultado)
+   A_SortMerge_200part    corrida 1        0.663 s  (6547 filas resultado)
+   A_SortMerge_200part    corrida 2        0.536 s  (6547 filas resultado)
+   A_SortMerge_200part    corrida 3        0.461 s  (6547 filas resultado)
+   B_Broadcast_200part    calentamiento    0.457 s  (6547 filas resultado)
+   B_Broadcast_200part    corrida 1        0.314 s  (6547 filas resultado)
+   B_Broadcast_200part    corrida 2        0.270 s  (6547 filas resultado)
+   B_Broadcast_200part    corrida 3        0.244 s  (6547 filas resultado)
+   C_SortMerge_16part     calentamiento    0.304 s  (6547 filas resultado)
+   C_SortMerge_16part     corrida 1        0.310 s  (6547 filas resultado)
+   C_SortMerge_16part     corrida 2        0.268 s  (6547 filas resultado)
+   C_SortMerge_16part     corrida 3        0.287 s  (6547 filas resultado)
+   D_Broadcast_16part     calentamiento    0.193 s  (6547 filas resultado)
+   D_Broadcast_16part     corrida 1        0.180 s  (6547 filas resultado)
+   D_Broadcast_16part     corrida 2        0.349 s  (6547 filas resultado)
+   D_Broadcast_16part     corrida 3        0.178 s  (6547 filas resultado)
+
+==============================================================================
+ explain() plan fisico final - A_SortMerge_200part
+==============================================================================
+== Physical Plan ==
+AdaptiveSparkPlan isFinalPlan=true
++- == Final Plan ==
+   *(12) HashAggregate(keys=[DEPTO_N#32, DIST_N#50, ANIO#89, MES#110], functions=[count(1), avg(PP_TOTAL#238), max(N_PELIGROS#388L), max(PCT_MAS_20#478)])
+   +- *(12) HashAggregate(keys=[DEPTO_N#32, DIST_N#50, ANIO#89, MES#110], functions=[partial_count(1), partial_avg(PP_TOTAL#238), partial_max(N_PELIGROS#388L), partial_max(PCT_MAS_20#478)])
+      +- *(12) Project [DEPTO_N#32, DIST_N#50, ANIO#89, MES#110, PP_TOTAL#238, N_PELIGROS#388L, PCT_MAS_20#478]
+         +- *(12) SortMergeJoin [DEPTO_N#32, DIST_N#50], [DEPTO_N#428, DIST_N#444], LeftOuter
+            :- *(10) Project [DEPTO_N#32, DIST_N#50, ANIO#89, MES#110, PP_TOTAL#238, N_PELIGROS#388L]
+            :  +- *(10) SortMergeJoin [DEPTO_N#32, DIST_N#50], [DEPTO_N#303, DIST_N#323], LeftOuter
+            :     :- *(8) Sort [DEPTO_N#32 ASC NULLS FIRST, DIST_N#50 ASC NULLS FIRST], false, 0
+            :     :  +- AQEShuffleRead coalesced
+            :     :     +- ShuffleQueryStage 4
+            :     :        +- Exchange hashpartitioning(DEPTO_N#32, DIST_N#50, 200), ENSURE_REQUIREMENTS, [id=#2065]
+            :     :           +- *(7) Project [DEPTO_N#32, ANIO#89, MES#110, DIST_N#50, PP_TOTAL#238]
+            :     :              +- *(7) SortMergeJoin [DEPTO_N#32, ANIO#89, MES#110], [DEPTO_N#210, ANIO#212, MES#213], LeftOuter
+            :     :                 :- *(5) Sort [DEPTO_N#32 ASC NULLS FIRST, ANIO#89 ASC NULLS FIRST, MES#110 ASC NULLS FIRST], false, 0
+            :     :                 :  +- AQEShuffleRead coalesced
+            :     :                 :     +- ShuffleQueryStage 0
+            :     :                 :        +- Exchange hashpartitioning(DEPTO_N#32, ANIO#89, MES#110, 200), ENSURE_REQUIREMENTS, [id=#1843]
+            :     :                 :           +- *(1) Project [DEPTO_N#32, DIST_N#50, ANIO#89, MES#110]
+            :     :                 :              +- *(1) Scan ExistingRDD[IDINTERRUPCION#0,TIPOINTERRUPCION#3,DEPTO_N#32,DIST_N#50,ANIO#89,MES#110]
+            :     :                 +- *(6) Sort [DEPTO_N#210 ASC NULLS FIRST, ANIO#212 ASC NULLS FIRST, MES#213 ASC NULLS FIRST], false, 0
+            :     :                    +- AQEShuffleRead coalesced
+            :     :                       +- ShuffleQueryStage 1
+            :     :                          +- Exchange hashpartitioning(DEPTO_N#210, ANIO#212, MES#213, 200), ENSURE_REQUIREMENTS, [id=#1850]
+            :     :                             +- *(2) Project [DEPTO_N#210, ANIO#212, MES#213, PP_TOTAL#238]
+            :     :                                +- *(2) Filter ((isnotnull(DEPTO_N#210) AND isnotnull(ANIO#212)) AND isnotnull(MES#213))
+            :     :                                   +- *(2) Scan ExistingRDD[DEPTO_N#210,ANIO#212,MES#213,PP_TOTAL#238,DIAS_LLUVIA_ALTA#240]
+            :     +- *(9) Sort [DEPTO_N#303 ASC NULLS FIRST, DIST_N#323 ASC NULLS FIRST], false, 0
+            :        +- AQEShuffleRead coalesced
+            :           +- ShuffleQueryStage 2
+            :              +- Exchange hashpartitioning(DEPTO_N#303, DIST_N#323, 200), ENSURE_REQUIREMENTS, [id=#1866]
+            :                 +- *(3) Filter (isnotnull(DEPTO_N#303) AND isnotnull(DIST_N#323))
+            :                    +- *(3) Scan ExistingRDD[DEPTO_N#303,DIST_N#323,N_PELIGROS#388L]
+            +- *(11) Sort [DEPTO_N#428 ASC NULLS FIRST, DIST_N#444 ASC NULLS FIRST], false, 0
+               +- AQEShuffleRead coalesced
+                  +- ShuffleQueryStage 3
+                     +- Exchange hashpartitioning(DEPTO_N#428, DIST_N#444, 200), ENSURE_REQUIREMENTS, [id=#1880]
+                        +- *(4) Filter (isnotnull(DEPTO_N#428) AND isnotnull(DIST_N#444))
+                           +- *(4) Scan ExistingRDD[DEPTO_N#428,DIST_N#444,PCT_MAS_20#478]
+
+
+==============================================================================
+ explain() plan fisico final - B_Broadcast_200part
+==============================================================================
+== Physical Plan ==
+AdaptiveSparkPlan isFinalPlan=true
++- == Final Plan ==
+   *(5) HashAggregate(keys=[DEPTO_N#32, DIST_N#50, ANIO#89, MES#110], functions=[count(1), avg(PP_TOTAL#238), max(N_PELIGROS#388L), max(PCT_MAS_20#478)])
+   +- AQEShuffleRead coalesced
+      +- ShuffleQueryStage 3
+         +- Exchange hashpartitioning(DEPTO_N#32, DIST_N#50, ANIO#89, MES#110, 200), ENSURE_REQUIREMENTS, [id=#3199]
+            +- *(4) HashAggregate(keys=[DEPTO_N#32, DIST_N#50, ANIO#89, MES#110], functions=[partial_count(1), partial_avg(PP_TOTAL#238), partial_max(N_PELIGROS#388L), partial_max(PCT_MAS_20#478)])
+               +- *(4) Project [DEPTO_N#32, DIST_N#50, ANIO#89, MES#110, PP_TOTAL#238, N_PELIGROS#388L, PCT_MAS_20#478]
+                  +- *(4) BroadcastHashJoin [DEPTO_N#32, DIST_N#50], [DEPTO_N#428, DIST_N#444], LeftOuter, BuildRight, false
+                     :- *(4) Project [DEPTO_N#32, DIST_N#50, ANIO#89, MES#110, PP_TOTAL#238, N_PELIGROS#388L]
+                     :  +- *(4) BroadcastHashJoin [DEPTO_N#32, DIST_N#50], [DEPTO_N#303, DIST_N#323], LeftOuter, BuildRight, false
+                     :     :- *(4) Project [DEPTO_N#32, ANIO#89, MES#110, DIST_N#50, PP_TOTAL#238]
+                     :     :  +- *(4) BroadcastHashJoin [DEPTO_N#32, ANIO#89, MES#110], [DEPTO_N#210, ANIO#212, MES#213], LeftOuter, BuildRight, false
+                     :     :     :- *(4) Project [DEPTO_N#32, DIST_N#50, ANIO#89, MES#110]
+                     :     :     :  +- *(4) Scan ExistingRDD[IDINTERRUPCION#0,TIPOINTERRUPCION#3,DEPTO_N#32,DIST_N#50,ANIO#89,MES#110]
+                     :     :     +- BroadcastQueryStage 0
+                     :     :        +- BroadcastExchange HashedRelationBroadcastMode(List(input[0, string, true], input[1, int, true], input[2, int, true]),false), [id=#3077]
+                     :     :           +- *(1) Project [DEPTO_N#210, ANIO#212, MES#213, PP_TOTAL#238]
+                     :     :              +- *(1) Filter ((isnotnull(DEPTO_N#210) AND isnotnull(ANIO#212)) AND isnotnull(MES#213))
+                     :     :                 +- *(1) Scan ExistingRDD[DEPTO_N#210,ANIO#212,MES#213,PP_TOTAL#238,DIAS_LLUVIA_ALTA#240]
+                     :     +- BroadcastQueryStage 1
+                     :        +- BroadcastExchange HashedRelationBroadcastMode(List(input[0, string, false], input[1, string, false]),false), [id=#3084]
+                     :           +- *(2) Filter (isnotnull(DEPTO_N#303) AND isnotnull(DIST_N#323))
+                     :              +- *(2) Scan ExistingRDD[DEPTO_N#303,DIST_N#323,N_PELIGROS#388L]
+                     +- BroadcastQueryStage 2
+                        +- BroadcastExchange HashedRelationBroadcastMode(List(input[0, string, false], input[1, string, false]),false), [id=#3091]
+                           +- *(3) Filter (isnotnull(DEPTO_N#428) AND isnotnull(DIST_N#444))
+                              +- *(3) Scan ExistingRDD[DEPTO_N#428,DIST_N#444,PCT_MAS_20#478]
+
+
+==============================================================================
+ RESUMEN (mediana de 3 corridas, tras 1 de calentamiento)
+==============================================================================
+modo                   corridas (s)                  mediana  joins en el plan final
+A_SortMerge_200part    0.663, 0.536, 0.461           0.536 s  {'SortMergeJoin': 3}
+B_Broadcast_200part    0.314, 0.270, 0.244           0.270 s  {'BroadcastHashJoin': 3}
+C_SortMerge_16part     0.310, 0.268, 0.287           0.287 s  {'SortMergeJoin': 3}
+D_Broadcast_16part     0.180, 0.349, 0.178           0.180 s  {'BroadcastHashJoin': 3}
+
+Variacion respecto a la linea base A (negativo = mas lento):
+   B_Broadcast_200part     +49.6 %  (0.536 s -> 0.270 s, speedup 1.99x)
+   C_SortMerge_16part      +46.5 %  (0.536 s -> 0.287 s, speedup 1.87x)
+   D_Broadcast_16part      +66.4 %  (0.536 s -> 0.180 s, speedup 2.98x)

@@ -1,0 +1,11 @@
+# Host (Windows): ingesta de XLSX, graficos y diagrama
+pandas==3.0.3
+numpy==2.4.6
+matplotlib==3.11.0
+openpyxl==3.1.5
+
+# Contenedor spark_node (Alpine, Python 3.7): PySpark 3.2.1 viene en la imagen.
+# MLlib necesita numpy:  docker exec spark_node apk add --no-cache py3-numpy   (instala numpy 1.16.4)
+
+# Contenedor de la prueba pandas (escalabilidad): cualquier imagen con pandas>=2.0
+# (en este equipo se uso la imagen local proyecto2-app con pandas 2.3.3).
