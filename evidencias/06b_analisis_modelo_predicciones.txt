@@ -1,0 +1,182 @@
+
+==============================================================================
+ 4.1 EDA - LA LIBERTAD (SEDALIB)
+==============================================================================
+La Libertad en el panel: 13 distritos, 780 distrito-meses, 514 interrupciones, 0 filas con clima
+
+[g1] Top distritos de La Libertad por interrupciones (2019-06 a 2024-05):
++--------------------+--------------+-----------+-------------+------------+
+|DIST_N              |interrupciones|imprevistas|meses_con_int|tasa_int_pct|
++--------------------+--------------+-----------+-------------+------------+
+|TRUJILLO            |226           |96         |32           |53.33       |
+|MOCHE               |74            |13         |15           |25.0        |
+|EL PORVENIR         |51            |17         |16           |26.67       |
+|SALAVERRY           |37            |18         |13           |21.67       |
+|LA ESPERANZA        |31            |4          |11           |18.33       |
+|VICTOR LARCO HERRERA|31            |19         |14           |23.33       |
+|HUANCHACO           |27            |6          |11           |18.33       |
+|FLORENCIA DE MORA   |20            |6          |8            |13.33       |
+|CHEPEN              |9             |6          |3            |5.0         |
+|PAIJAN              |4             |2          |2            |3.33        |
+|SIMBAL              |2             |1          |2            |3.33        |
+|CHOCOPE             |1             |0          |1            |1.67        |
+|RAZURI              |1             |0          |1            |1.67        |
++--------------------+--------------+-----------+-------------+------------+
+
+[g2] Tasa de interrupcion por rango de PP_TOTAL mensual
+     AVISO: SENAMHI no tiene estaciones en La Libertad -> se usa el nivel NACIONAL disponible
+     (distritos de LIMA, AREQUIPA y TACNA, con PP promedio de las estaciones del departamento).
++-----+---------+--------------+-------------+------------+--------------+
+|ORDEN|RANGO_PP |distrito_meses|meses_con_int|tasa_int_pct|interrupciones|
++-----+---------+--------------+-------------+------------+--------------+
+|0    |0 mm     |549           |216          |39.34       |1697          |
+|1    |0-10 mm  |2344          |1183         |50.47       |11868         |
+|2    |10-25 mm |840           |488          |58.1        |4410          |
+|3    |25-50 mm |654           |381          |58.26       |3942          |
+|4    |50-100 mm|1109          |670          |60.41       |6781          |
+|5    |>100 mm  |684           |395          |57.75       |3652          |
++-----+---------+--------------+-------------+------------+--------------+
+
+     Mismo cruce con PP del mes ANTERIOR (PP_TOTAL_LAG1):
++-----+---------+--------------+-------------+------------+--------------+
+|ORDEN|RANGO_PP |distrito_meses|meses_con_int|tasa_int_pct|interrupciones|
++-----+---------+--------------+-------------+------------+--------------+
+|0    |0 mm     |543           |211          |38.86       |1660          |
+|1    |0-10 mm  |2247          |1214         |54.03       |12436         |
+|2    |10-25 mm |840           |503          |59.88       |4244          |
+|3    |25-50 mm |654           |335          |51.22       |3626          |
+|4    |50-100 mm|1109          |676          |60.96       |6801          |
+|5    |>100 mm  |684           |385          |56.29       |3552          |
++-----+---------+--------------+-------------+------------+--------------+
+
+[g3] Tasa de interrupcion por cantidad de peligros inventariados (INGEMMET) en el distrito
+     AVISO: La Libertad solo tiene 13 distritos -> se muestra NACIONAL con La Libertad resaltada.
++--------------+-----+--------------+--------------+-------------+------------+--------------+---------+
+|AMBITO        |ORDEN|RANGO_PELIGROS|distrito_meses|meses_con_int|tasa_int_pct|interrupciones|distritos|
++--------------+-----+--------------+--------------+-------------+------------+--------------+---------+
+|LA LIBERTAD   |0    |0             |180           |41           |22.78       |247           |3        |
+|LA LIBERTAD   |1    |1-5           |420           |72           |17.14       |229           |7        |
+|LA LIBERTAD   |2    |6-20          |60            |11           |18.33       |27            |1        |
+|LA LIBERTAD   |3    |21-50         |120           |5            |4.17        |11            |2        |
+|RESTO DEL PAIS|0    |0             |2040          |867          |42.5        |3034          |34       |
+|RESTO DEL PAIS|1    |1-5           |4080          |1272         |31.18       |6270          |68       |
+|RESTO DEL PAIS|2    |6-20          |5460          |1770         |32.42       |12918         |91       |
+|RESTO DEL PAIS|3    |21-50         |4500          |1457         |32.38       |9858          |75       |
+|RESTO DEL PAIS|4    |>50           |2520          |1052         |41.75       |11947         |42       |
++--------------+-----+--------------+--------------+-------------+------------+--------------+---------+
+
+Distritos de La Libertad y sus peligros:
++--------------------+----------+----------------------+---------------------+
+|DIST_N              |N_PELIGROS|TIPO_PELIGRO_PRINCIPAL|PCT_SIST_MAS_20_ANIOS|
++--------------------+----------+----------------------+---------------------+
+|SIMBAL              |26        |FLUJO                 |22.22                |
+|CHEPEN              |21        |FLUJO                 |25.0                 |
+|HUANCHACO           |9         |FLUJO                 |null                 |
+|RAZURI              |4         |INUNDACION FLUVIAL    |18.18                |
+|EL PORVENIR         |3         |ARENAMIENTO           |null                 |
+|SALAVERRY           |2         |ARENAMIENTO           |null                 |
+|PAIJAN              |2         |ARENAMIENTO           |36.84                |
+|VICTOR LARCO HERRERA|1         |EROSION MARINA        |null                 |
+|LA ESPERANZA        |1         |FLUJO                 |null                 |
+|MOCHE               |1         |INUNDACION FLUVIAL    |0.0                  |
+|TRUJILLO            |0         |null                  |null                 |
+|FLORENCIA DE MORA   |0         |null                  |null                 |
+|CHOCOPE             |0         |null                  |40.0                 |
++--------------------+----------+----------------------+---------------------+
+
+
+==============================================================================
+ 4.2 MODELO BASE (MLlib) - split temporal
+==============================================================================
+Prueba = ANIO 2024 (ene-may, fin del archivo) | Entrenamiento = ANIOs anteriores
+Variables: rezagadas ['INT_LAG1', 'TARGET_LAG1', 'INT_PREV3'] + estaticas ['N_PELIGROS', 'PCT_SIST_MAS_20_ANIOS', 'PCT_SIST_NO_OPERA', 'INFRA_DISPONIBLE'] + MES (one-hot)
+Excluidas por fuga: N_INTERRUPCIONES, N_IMPREVISTAS, PP_TOTAL/PP_MAX del mismo mes, TARGET.
+
+==============================================================================
+ Variante M1 - todos los distritos (sin clima)
+==============================================================================
+train=17442 filas (prevalencia 0.3386) | test=1615 filas (prevalencia 0.3876) | distritos=323
+
+Metricas en prueba (umbral 0.5 para la matriz de confusion):
+   Regresion Logistica                AUC-ROC=0.8021  AUC-PR=0.7176 | TN=  772 FP=  217 FN=  184 TP=  442 | precision=0.671 recall=0.706
+   Arbol de Decision                  AUC-ROC=0.8120  AUC-PR=0.7142 | TN=  771 FP=  218 FN=  174 TP=  452 | precision=0.675 recall=0.722
+   Linea base ingenua (tasa hist.)    AUC-ROC=0.7907  AUC-PR=0.6858 | TN=  863 FP=  126 FN=  332 TP=  294 | precision=0.700 recall=0.470
+
+Importancia - Arbol de Decision (featureImportances):
+   INT_PREV3                0.9774
+   INT_LAG1                 0.0138
+   N_PELIGROS               0.0042
+   PCT_SIST_NO_OPERA        0.0021
+   PCT_SIST_MAS_20_ANIOS    0.0013
+   MES_10                   0.0007
+   MES_9                    0.0006
+   TARGET_LAG1              0.0000
+   INFRA_DISPONIBLE         0.0000
+   MES_1                    0.0000
+Coeficientes estandarizados - Regresion Logistica (top 10 por |coef|):
+   INT_PREV3                +6.1332
+   TARGET_LAG1              +0.5502
+   INFRA_DISPONIBLE         -0.1418
+   N_PELIGROS               +0.0949
+   MES_11                   +0.0921
+   INT_LAG1                 +0.0747
+   PCT_SIST_NO_OPERA        -0.0600
+   MES_10                   +0.0518
+   MES_2                    -0.0515
+   MES_6                    +0.0455
+
+==============================================================================
+ Variante M2 - distritos con estacion SENAMHI (+ clima rezagado)
+==============================================================================
+train=5562 filas (prevalencia 0.5502) | test=515 filas (prevalencia 0.5126) | distritos=103
+
+Metricas en prueba (umbral 0.5 para la matriz de confusion):
+   Regresion Logistica                AUC-ROC=0.7985  AUC-PR=0.7784 | TN=  157 FP=   94 FN=   37 TP=  227 | precision=0.707 recall=0.860
+   Arbol de Decision                  AUC-ROC=0.7785  AUC-PR=0.7313 | TN=  158 FP=   93 FN=   34 TP=  230 | precision=0.712 recall=0.871
+   Linea base ingenua (tasa hist.)    AUC-ROC=0.8076  AUC-PR=0.7725 | TN=  182 FP=   69 FN=   63 TP=  201 | precision=0.744 recall=0.761
+
+Importancia - Arbol de Decision (featureImportances):
+   INT_PREV3                0.9887
+   INT_LAG1                 0.0071
+   MES_3                    0.0024
+   INFRA_DISPONIBLE         0.0019
+   TARGET_LAG1              0.0000
+   N_PELIGROS               0.0000
+   PCT_SIST_MAS_20_ANIOS    0.0000
+   PCT_SIST_NO_OPERA        0.0000
+   PP_TOTAL_LAG1            0.0000
+   PP_MAX_LAG1              0.0000
+Coeficientes estandarizados - Regresion Logistica (top 10 por |coef|):
+   INT_PREV3                +8.3475
+   INT_LAG1                 +0.6181
+   TARGET_LAG1              +0.4843
+   INFRA_DISPONIBLE         -0.1984
+   PP_TOTAL_LAG1            -0.1487
+   MES_3                    +0.1439
+   MES_4                    +0.1353
+   MES_8                    -0.1254
+   PP_MAX_LAG1              -0.1238
+   MES_5                    +0.1109
+
+Predicciones de prueba M1 guardadas: 1615 filas -> evidencias/modelo_m1_predicciones_test.csv
+
+==============================================================================
+ TOP 10 DISTRITOS DE LA LIBERTAD CON MAS RIESGO (modelo M1)
+==============================================================================
+Modelo usado: Regresion Logistica (mayor AUC-PR en M1). Riesgo = probabilidad media predicha en 2024.
++--------------------+------------+----------+------------------+---------------+
+|DIST_N              |riesgo_medio|riesgo_max|meses_con_int_real|meses_evaluados|
++--------------------+------------+----------+------------------+---------------+
+|TRUJILLO            |0.9944      |1.0       |4                 |5              |
+|SALAVERRY           |0.7047      |0.8992    |4                 |5              |
+|VICTOR LARCO HERRERA|0.6044      |0.7624    |3                 |5              |
+|EL PORVENIR         |0.5555      |0.8066    |4                 |5              |
+|MOCHE               |0.5332      |0.6842    |4                 |5              |
+|CHEPEN              |0.4037      |0.6989    |2                 |5              |
+|HUANCHACO           |0.3631      |0.7631    |3                 |5              |
+|FLORENCIA DE MORA   |0.3453      |0.6263    |2                 |5              |
+|LA ESPERANZA        |0.3283      |0.5774    |2                 |5              |
+|PAIJAN              |0.12        |0.1396    |0                 |5              |
++--------------------+------------+----------+------------------+---------------+
+only showing top 10 rows
+
