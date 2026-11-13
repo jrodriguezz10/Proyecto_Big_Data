@@ -1,0 +1,59 @@
+
+==============================================================================
+ a. IDENTIDAD (sts get-caller-identity) - modo APLICAR
+==============================================================================
+Cuenta : 856152566912
+ARN    : arn:aws:iam::856152566912:user/proyecto-bigdata
+Region : us-east-2 | Bucket: s3://bigdata-lalibertad-jheyson-856152566912
+
+==============================================================================
+ b. SEGURIDAD Y ETIQUETAS DEL BUCKET
+==============================================================================
+control                      estado actual                      objetivo
+Bloqueo de acceso publico    completo                           las 4 opciones = True
+Cifrado por defecto          AES256                             AES256 (SSE-S3)
+Versionado                   Disabled                           Enabled
+Etiquetas                    ninguna                            {'Proyecto': 'SEDALIB', 'Curso': 'BigData-UPAO'}
+APLICADO  Versionado: Disabled -> Enabled
+APLICADO  Etiquetas: ninguna -> {'Proyecto': 'SEDALIB', 'Curso': 'BigData-UPAO'}
+Verificacion: bloqueo=True | cifrado=AES256 | versionado=Enabled | etiquetas={'Proyecto': 'SEDALIB', 'Curso': 'BigData-UPAO'}
+
+==============================================================================
+ c. SUBIDA data/raw/ -> s3://bigdata-lalibertad-jheyson-856152566912/raw/ (omite mismo tamano)
+==============================================================================
+SUBIDO   raw/clima/clima_nasa_la_libertad.csv                    0.15 MB
+SUBIDO   raw/clima/senamhi_clima.csv                            48.14 MB
+SUBIDO   raw/geologia/ingemmet_peligros.csv                     27.48 MB
+SUBIDO   raw/infraestructura/datass_antiguedad.csv               2.94 MB
+SUBIDO   raw/infraestructura/datass_antiguedad.xlsx              1.86 MB
+SUBIDO   raw/infraestructura/datass_estado.csv                   1.34 MB
+SUBIDO   raw/infraestructura/datass_estado.xlsx                  1.03 MB
+SUBIDO   raw/operaciones/sunass_anf.csv                          0.00 MB
+SUBIDO   raw/operaciones/sunass_hidrojets.csv                    1.78 MB
+SUBIDO   raw/operaciones/sunass_interrupciones.csv               7.23 MB
+Resumen: 10 subidos, 0 omitidos, 10 locales
+
+==============================================================================
+ d. LISTADO s3://bigdata-lalibertad-jheyson-856152566912/raw/ vs data/raw/ local
+==============================================================================
+ruta S3                                                 S3 (MB)   local (MB) estado
+raw/clima/clima_nasa_la_libertad.csv                       0.15         0.15 OK
+raw/clima/senamhi_clima.csv                               48.14        48.14 OK
+raw/geologia/ingemmet_peligros.csv                        27.48        27.48 OK
+raw/infraestructura/datass_antiguedad.csv                  2.94         2.94 OK
+raw/infraestructura/datass_antiguedad.xlsx                 1.86         1.86 OK
+raw/infraestructura/datass_estado.csv                      1.34         1.34 OK
+raw/infraestructura/datass_estado.xlsx                     1.03         1.03 OK
+raw/operaciones/sunass_anf.csv                             0.00         0.00 OK
+raw/operaciones/sunass_hidrojets.csv                       1.78         1.78 OK
+raw/operaciones/sunass_interrupciones.csv                  7.23         7.23 OK
+Archivos: S3=10 | local=10 | coinciden=10 | Total S3=91.96 MB | Total local=91.96 MB
+
+==============================================================================
+ e. COMPROBACION DE ACCESO (solo lectura, no crea nada)
+==============================================================================
+emr-serverless list-applications     ERROR AccessDeniedException sin permiso IAM
+glue get-databases                   RESPONDE        0 bases: []
+athena list-work-groups              RESPONDE        workgroups: ['primary']
+
+Evidencia: evidencias/aws_01_s3.txt (sin claves: solo cuenta y ARN).
