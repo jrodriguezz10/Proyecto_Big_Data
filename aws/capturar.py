@@ -35,7 +35,8 @@ class RECT(ctypes.Structure):
 
 
 def capturar_ventana(hwnd, nombre):
-    user32.ShowWindow(hwnd, 9)                 # SW_RESTORE
+    if user32.IsIconic(hwnd):
+        user32.ShowWindow(hwnd, 9)             # SW_RESTORE solo si esta minimizada
     user32.SetForegroundWindow(hwnd)
     time.sleep(1.0)
     r = RECT()                                 # limites visibles (sin el borde invisible de Windows 11)
@@ -94,10 +95,28 @@ def terminal(comando, nombre, espera=10):
     user32.PostMessageW(hwnd, 0x0010, 0, 0)    # WM_CLOSE
 
 
-def navegador(url, nombre, espera=8):
+def titulo_ventana(hwnd):
+    n = user32.GetWindowTextLengthW(hwnd)
+    buf = ctypes.create_unicode_buffer(n + 1)
+    user32.GetWindowTextW(hwnd, buf, n + 1)
+    return buf.value
+
+
+def navegador(url, nombre, espera=8, maximo=45):
+    """Abre la URL, espera >= 8 s y hasta que la pestana activa sea la del bucket (pasada la
+    redireccion de signin); maximiza la ventana y captura. Si no carga, no guarda nada."""
     webbrowser.open(url)
     time.sleep(espera)
-    capturar_ventana(user32.GetForegroundWindow(), nombre)
+    fin = time.time() + maximo
+    hwnd = user32.GetForegroundWindow()
+    while BUCKET not in titulo_ventana(hwnd) and time.time() < fin:
+        time.sleep(2)
+        hwnd = user32.GetForegroundWindow()
+    if BUCKET not in titulo_ventana(hwnd):
+        sys.exit("La consola no cargo el bucket (titulo: %r). Inicia sesion y repite." % titulo_ventana(hwnd))
+    user32.ShowWindow(hwnd, 3)                 # SW_MAXIMIZE
+    time.sleep(4)                              # termina de pintar el contenido de la pestana
+    capturar_ventana(hwnd, nombre)
 
 
 def main():
