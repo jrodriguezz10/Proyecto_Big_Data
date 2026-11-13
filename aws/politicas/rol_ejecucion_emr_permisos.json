@@ -1,0 +1,78 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "BucketUbicacion",
+      "Effect": "Allow",
+      "Action": "s3:GetBucketLocation",
+      "Resource": "arn:aws:s3:::bigdata-lalibertad-jheyson-856152566912"
+    },
+    {
+      "Sid": "ListarSoloPrefijosDelProyecto",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::bigdata-lalibertad-jheyson-856152566912",
+      "Condition": {
+        "StringLike": {
+          "s3:prefix": [
+            "raw", "raw/*", "processed", "processed/*", "curated", "curated/*",
+            "logs", "logs/*", "scripts", "scripts/*"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "LecturaRawYScripts",
+      "Effect": "Allow",
+      "Action": "s3:GetObject",
+      "Resource": [
+        "arn:aws:s3:::bigdata-lalibertad-jheyson-856152566912/raw/*",
+        "arn:aws:s3:::bigdata-lalibertad-jheyson-856152566912/scripts/*"
+      ]
+    },
+    {
+      "Sid": "LecturaEscrituraProcessedCuratedLogs",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject",
+        "s3:AbortMultipartUpload",
+        "s3:ListMultipartUploadParts"
+      ],
+      "Resource": [
+        "arn:aws:s3:::bigdata-lalibertad-jheyson-856152566912/processed/*",
+        "arn:aws:s3:::bigdata-lalibertad-jheyson-856152566912/curated/*",
+        "arn:aws:s3:::bigdata-lalibertad-jheyson-856152566912/logs/*"
+      ]
+    },
+    {
+      "Sid": "GlueDataCatalogSedalib",
+      "Effect": "Allow",
+      "Action": [
+        "glue:GetDatabase",
+        "glue:GetDatabases",
+        "glue:CreateDatabase",
+        "glue:GetTable",
+        "glue:GetTables",
+        "glue:CreateTable",
+        "glue:UpdateTable",
+        "glue:DeleteTable",
+        "glue:GetPartition",
+        "glue:GetPartitions",
+        "glue:BatchGetPartition",
+        "glue:CreatePartition",
+        "glue:BatchCreatePartition",
+        "glue:UpdatePartition",
+        "glue:DeletePartition",
+        "glue:BatchDeletePartition"
+      ],
+      "Resource": [
+        "arn:aws:glue:us-east-2:856152566912:catalog",
+        "arn:aws:glue:us-east-2:856152566912:database/sedalib",
+        "arn:aws:glue:us-east-2:856152566912:table/sedalib/*",
+        "arn:aws:glue:us-east-2:856152566912:database/default"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "EMRServerlessListar",
+      "Effect": "Allow",
+      "Action": "emr-serverless:ListApplications",
+      "Resource": "*"
+    },
+    {
+      "Sid": "EMRServerlessAplicacionesYJobs",
+      "Effect": "Allow",
+      "Action": [
+        "emr-serverless:CreateApplication",
+        "emr-serverless:GetApplication",
+        "emr-serverless:UpdateApplication",
+        "emr-serverless:StartApplication",
+        "emr-serverless:StopApplication",
+        "emr-serverless:DeleteApplication",
+        "emr-serverless:StartJobRun",
+        "emr-serverless:GetJobRun",
+        "emr-serverless:ListJobRuns",
+        "emr-serverless:CancelJobRun",
+        "emr-serverless:GetDashboardForJobRun",
+        "emr-serverless:TagResource",
+        "emr-serverless:ListTagsForResource"
+      ],
+      "Resource": "arn:aws:emr-serverless:us-east-2:856152566912:/applications/*"
+    },
+    {
+      "Sid": "PasarSoloRolDeEjecucionEMR",
+      "Effect": "Allow",
+      "Action": "iam:PassRole",
+      "Resource": "arn:aws:iam::856152566912:role/sedalib-emr-execution-role",
+      "Condition": {
+        "StringEquals": { "iam:PassedToService": "emr-serverless.amazonaws.com" }
+      }
+    },
+    {
+      "Sid": "LeerRolDeEjecucionEMR",
+      "Effect": "Allow",
+      "Action": "iam:GetRole",
+      "Resource": "arn:aws:iam::856152566912:role/sedalib-emr-execution-role"
+    },
+    {
+      "Sid": "RolVinculadoEMRServerless",
+      "Effect": "Allow",
+      "Action": "iam:CreateServiceLinkedRole",
+      "Resource": "arn:aws:iam::856152566912:role/aws-service-role/ops.emr-serverless.amazonaws.com/AWSServiceRoleForAmazonEMRServerless",
+      "Condition": {
+        "StringEquals": { "iam:AWSServiceName": "ops.emr-serverless.amazonaws.com" }
+      }
+    },
+    {
+      "Sid": "LogsCloudWatchSoloLectura",
+      "Effect": "Allow",
+      "Action": [
+        "logs:DescribeLogGroups",
+        "logs:DescribeLogStreams",
+        "logs:GetLogEvents",
+        "logs:FilterLogEvents"
+      ],
+      "Resource": "arn:aws:logs:us-east-2:856152566912:log-group:*"
+    },
+    {
+      "Sid": "PresupuestoVer",
+      "Effect": "Allow",
+      "Action": "budgets:ViewBudget",
+      "Resource": "arn:aws:budgets::856152566912:budget/*"
+    },
+    {
+      "Sid": "PresupuestoCrearSoloSedalib",
+      "Effect": "Allow",
+      "Action": "budgets:ModifyBudget",
+      "Resource": "arn:aws:budgets::856152566912:budget/sedalib-*"
+    }
+  ]
+}

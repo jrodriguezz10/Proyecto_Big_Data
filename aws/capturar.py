@@ -6,6 +6,9 @@ Uso (desde la raiz del proyecto):
     python aws/capturar.py bucket      -> capturas/aws/cap_aws01_bucket.png
     python aws/capturar.py permisos    -> capturas/aws/cap_aws01_seguridad.png
     python aws/capturar.py propiedades -> capturas/aws/cap_aws01_seguridad_propiedades.png
+    python aws/capturar.py rol         -> capturas/aws/cap_aws02_rol.png
+    python aws/capturar.py emr         -> capturas/aws/cap_aws02_emr_app.png
+    python aws/capturar.py budget      -> capturas/aws/cap_aws02_budget.png
 Las terminales ejecutan "cls" antes del comando. Nunca se muestran claves: sts se consulta con
 --query para mostrar solo cuenta y ARN. Revisar cada PNG antes de versionarlo.
 """
@@ -25,6 +28,10 @@ BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEST = os.path.join(BASE, "capturas", "aws")
 CONSOLA = "https://s3.console.aws.amazon.com/s3/buckets/%s?region=%s" % (BUCKET, REGION)
 TITULO = "CAP_AWS01"
+ROL_EMR, APP_EMR, PRESUPUESTO = "sedalib-emr-execution-role", "sedalib-spark", "sedalib-10usd"
+IAM_ROL = "https://us-east-1.console.aws.amazon.com/iam/home#/roles/details/%s?section=permissions" % ROL_EMR
+EMR_APPS = "https://%s.console.aws.amazon.com/emr/home?region=%s#/serverless" % (REGION, REGION)
+BUDGETS = "https://us-east-1.console.aws.amazon.com/billing/home#/budgets"
 
 user32 = ctypes.windll.user32
 user32.SetProcessDPIAware()
@@ -102,20 +109,21 @@ def titulo_ventana(hwnd):
     return buf.value
 
 
-def navegador(url, nombre, espera=8, maximo=45):
-    """Abre la URL, espera >= 8 s y hasta que la pestana activa sea la del bucket (pasada la
-    redireccion de signin); maximiza la ventana y captura. Si no carga, no guarda nada."""
+def navegador(url, nombre, contiene=(BUCKET,), espera=8, maximo=45, pintar=4):
+    """Abre la URL, espera >= espera s y hasta que el titulo de la pestana activa contenga alguno de
+    `contiene` (pasada la redireccion de signin); maximiza la ventana y captura. Si no carga, no guarda."""
     webbrowser.open(url)
     time.sleep(espera)
     fin = time.time() + maximo
+    ok = lambda h: any(c in titulo_ventana(h) for c in contiene) and "signin" not in titulo_ventana(h).lower()
     hwnd = user32.GetForegroundWindow()
-    while BUCKET not in titulo_ventana(hwnd) and time.time() < fin:
+    while not ok(hwnd) and time.time() < fin:
         time.sleep(2)
         hwnd = user32.GetForegroundWindow()
-    if BUCKET not in titulo_ventana(hwnd):
-        sys.exit("La consola no cargo el bucket (titulo: %r). Inicia sesion y repite." % titulo_ventana(hwnd))
+    if not ok(hwnd):
+        sys.exit("La consola no cargo la pagina esperada (titulo: %r). Inicia sesion y repite." % titulo_ventana(hwnd))
     user32.ShowWindow(hwnd, 3)                 # SW_MAXIMIZE
-    time.sleep(4)                              # termina de pintar el contenido de la pestana
+    time.sleep(pintar)                         # termina de pintar el contenido de la pestana
     capturar_ventana(hwnd, nombre)
 
 
@@ -135,6 +143,13 @@ def main():
         navegador(CONSOLA + "&tab=permissions", "cap_aws01_seguridad.png")
     elif op == "propiedades":
         navegador(CONSOLA + "&tab=properties", "cap_aws01_seguridad_propiedades.png")
+    elif op == "rol":
+        navegador(IAM_ROL, "cap_aws02_rol.png", contiene=(ROL_EMR, "IAM"), pintar=6)
+    elif op == "emr":
+        navegador(EMR_APPS, "cap_aws02_emr_app.png", contiene=(APP_EMR, "EMR"), pintar=8)
+    elif op == "budget":
+        navegador(BUDGETS, "cap_aws02_budget.png", contiene=(PRESUPUESTO, "Budget", "Presupuesto", "Billing", "Facturaci"),
+                  pintar=8)
     else:
         sys.exit(__doc__)
 

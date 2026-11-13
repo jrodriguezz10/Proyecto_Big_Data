@@ -1,0 +1,15 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ConfianzaEMRServerless",
+      "Effect": "Allow",
+      "Principal": { "Service": "emr-serverless.amazonaws.com" },
+      "Action": "sts:AssumeRole",
+      "Condition": {
+        "StringEquals": { "aws:SourceAccount": "856152566912" },
+        "ArnLike": { "aws:SourceArn": "arn:aws:emr-serverless:us-east-2:856152566912:/applications/*" }
+      }
+    }
+  ]
+}
