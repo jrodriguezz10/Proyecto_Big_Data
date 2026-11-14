@@ -2,9 +2,9 @@
 ==============================================================================
  a. IDENTIDAD (sts get-caller-identity) - modo APLICAR
 ==============================================================================
-Cuenta : 856152566912
-ARN    : arn:aws:iam::856152566912:user/proyecto-bigdata
-Region : us-east-2 | Bucket: s3://bigdata-lalibertad-jheyson-856152566912
+Cuenta : <CUENTA>
+ARN    : arn:aws:iam::<CUENTA>:user/proyecto-bigdata
+Region : us-east-2 | Bucket: s3://bigdata-lalibertad-jheyson-<CUENTA>
 
 ==============================================================================
  b. SEGURIDAD Y ETIQUETAS DEL BUCKET
@@ -19,7 +19,7 @@ APLICADO  Etiquetas: ninguna -> {'Proyecto': 'SEDALIB', 'Curso': 'BigData-UPAO'}
 Verificacion: bloqueo=True | cifrado=AES256 | versionado=Enabled | etiquetas={'Proyecto': 'SEDALIB', 'Curso': 'BigData-UPAO'}
 
 ==============================================================================
- c. SUBIDA data/raw/ -> s3://bigdata-lalibertad-jheyson-856152566912/raw/ (omite mismo tamano)
+ c. SUBIDA data/raw/ -> s3://bigdata-lalibertad-jheyson-<CUENTA>/raw/ (omite mismo tamano)
 ==============================================================================
 SUBIDO   raw/clima/clima_nasa_la_libertad.csv                    0.15 MB
 SUBIDO   raw/clima/senamhi_clima.csv                            48.14 MB
@@ -34,7 +34,7 @@ SUBIDO   raw/operaciones/sunass_interrupciones.csv               7.23 MB
 Resumen: 10 subidos, 0 omitidos, 10 locales
 
 ==============================================================================
- d. LISTADO s3://bigdata-lalibertad-jheyson-856152566912/raw/ vs data/raw/ local
+ d. LISTADO s3://bigdata-lalibertad-jheyson-<CUENTA>/raw/ vs data/raw/ local
 ==============================================================================
 ruta S3                                                 S3 (MB)   local (MB) estado
 raw/clima/clima_nasa_la_libertad.csv                       0.15         0.15 OK

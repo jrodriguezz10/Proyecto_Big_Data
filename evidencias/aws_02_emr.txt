@@ -2,14 +2,14 @@
 ==============================================================================
  a. IDENTIDAD - modo APLICAR
 ==============================================================================
-Cuenta : 856152566912
-ARN    : arn:aws:iam::856152566912:user/proyecto-bigdata
+Cuenta : <CUENTA>
+ARN    : arn:aws:iam::<CUENTA>:user/proyecto-bigdata
 Region : us-east-2
 
 ==============================================================================
  b. VERIFICACION DE ACCESO
 ==============================================================================
-iam get-role sedalib-emr-execution-role OK      arn:aws:iam::856152566912:role/sedalib-emr-execution-role
+iam get-role sedalib-emr-execution-role OK      arn:aws:iam::<CUENTA>:role/sedalib-emr-execution-role
 emr-serverless list-applications   OK      0 aplicaciones
 budgets describe-budgets           OK      1 presupuestos
 
@@ -25,6 +25,6 @@ Verificacion: sedalib-10usd | limite 10.0 USD/MONTHLY | avisos: ACTUAL > 50 %, A
 Version EMR: emr-7.9.0
 CREANDO   sedalib-spark: SPARK emr-7.9.0, X86_64, capacidad maxima 8 vCPU / 32 GB, sin capacidad preinicializada, autoinicio, autoapagado 5 min, etiquetas {'Proyecto': 'SEDALIB', 'Curso': 'BigData-UPAO'}
 Verificacion: sedalib-spark | id 00ga9klqb8i0lq0d | estado CREATED | Spark | emr-7.9.0 | max 8 vCPU / 32 GB | autoapagado 5 min | etiquetas {'Proyecto': 'SEDALIB', 'Curso': 'BigData-UPAO'}
-Rol de ejecucion para los jobs: arn:aws:iam::856152566912:role/sedalib-emr-execution-role
+Rol de ejecucion para los jobs: arn:aws:iam::<CUENTA>:role/sedalib-emr-execution-role
 
 Evidencia: evidencias/aws_02_emr.txt (sin claves; correo enmascarado).

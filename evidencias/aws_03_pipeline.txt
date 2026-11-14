@@ -2,9 +2,9 @@
 ==============================================================================
  a. CONTEXTO - modo APLICAR
 ==============================================================================
-Cuenta 856152566912 | arn:aws:iam::856152566912:user/proyecto-bigdata
+Cuenta <CUENTA> | arn:aws:iam::<CUENTA>:user/proyecto-bigdata
 Aplicacion sedalib-spark (00ga9klqb8i0lq0d) | emr-7.9.0 | estado CREATED | max 8 vCPU / 32 GB
-Rol: arn:aws:iam::856152566912:role/sedalib-emr-execution-role | datos: s3://bigdata-lalibertad-jheyson-856152566912/raw/ -> processed/, curated/ | logs: s3://bigdata-lalibertad-jheyson-856152566912/logs/
+Rol: arn:aws:iam::<CUENTA>:role/sedalib-emr-execution-role | datos: s3://bigdata-lalibertad-jheyson-<CUENTA>/raw/ -> processed/, curated/ | logs: s3://bigdata-lalibertad-jheyson-<CUENTA>/logs/
 Recursos por job: driver 2 vCPU/8 GB + hasta 3 executors 2 vCPU/8 GB (spark.*.memory=7g + overhead)
 Precios us-east-2: 0.052624 USD/vCPU-h, 0.0057785 USD/GB-h, 0.000111 USD/GB-h disco (>20 GB/worker)
 
@@ -18,7 +18,7 @@ Precios us-east-2: 0.052624 USD/vCPU-h, 0.0057785 USD/GB-h, 0.000111 USD/GB-h di
 Techo estimado: 0.606 USD por hora con 4 workers | pipeline ~37 min -> <= 0.37 USD
 
 ==============================================================================
- c. SUBIDA DE SCRIPTS a s3://bigdata-lalibertad-jheyson-856152566912/scripts/
+ c. SUBIDA DE SCRIPTS a s3://bigdata-lalibertad-jheyson-<CUENTA>/scripts/
 ==============================================================================
 subido scripts/comun.py
 subido scripts/emr_lanzador.py
