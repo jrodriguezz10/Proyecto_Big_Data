@@ -101,3 +101,19 @@ Los datos son los mismos: silver 19380 filas en ambos, 19057 filas modelables, p
   pocas filas mueven mucho la curva PR. Verificado: las 16 diferencias dAUC-PR (modelo - regla ingenua)
   obtenidas en AWS caen dentro de los IC 95 % bootstrap del holdout local (evidencias/metricas_modelos.csv),
   en ambos ambitos; ninguna conclusion cambia.
+
+==============================================================================
+ i. DETALLE M1-GBT (modelo seleccionado) - holdout 2024-01..05, local vs AWS
+==============================================================================
+ambito       entorno  AUC-PR  AUC-ROC  umbral  precision recall |  TN  FP  FN  TP
+NACIONAL     local    0.7293  0.8133   0.1102  0.4949    0.9345 | 392 597  41 585
+NACIONAL     AWS      0.7248  0.8138   0.1084  0.4895    0.9329 | 380 609  42 584
+LA_LIBERTAD  local    0.6387  0.7741   0.1102  0.5682    0.8929 |  18  19   3  25
+LA_LIBERTAD  AWS      0.6270  0.7645   0.1084  0.5682    0.8929 |  18  19   3  25
+CV (4 cortes) AUC-PR media: local 0.8496 | AWS 0.8497 (desv 0.0262 en ambos)
+* El umbral se elige en la validacion agrupada de cada entorno (recall max con precision >= 0.60):
+  0.1102 local vs 0.1084 AWS, porque las probabilidades del GBT difieren levemente (ver seccion h).
+  Con un umbral algo menor, AWS marca 11 positivos mas a nivel nacional (1193 vs 1182: +12 FP, -1 TP):
+  precision -0.0054, recall -0.0016. En La Libertad la matriz de confusion es identica.
+* AUC-PR nacional -0.0045 y La Libertad -0.0117; AUC-ROC nacional +0.0005. La media de CV, que es
+  la que decide la seleccion, es practicamente igual (0.8496 vs 0.8497).
