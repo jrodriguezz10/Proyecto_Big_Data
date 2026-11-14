@@ -1,0 +1,10 @@
+Listado de s3://<bucket>/escalabilidad/ antes de borrar (2026-11-14 09:19)
+escala   tipo          archivos           MB
+100X     processed            9         0.17
+100X     raw copiado          9        84.73
+100X     replica              3       728.13
+500X     processed            9         0.17
+500X     raw copiado          9        84.73
+500X     replica              3      3659.83
+1000X    replica              3      7324.46
+TOTAL                         45     11882.24

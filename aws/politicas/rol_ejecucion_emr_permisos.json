@@ -16,7 +16,7 @@
         "StringLike": {
           "s3:prefix": [
             "raw", "raw/*", "processed", "processed/*", "curated", "curated/*",
-            "logs", "logs/*", "scripts", "scripts/*"
+            "logs", "logs/*", "scripts", "scripts/*", "escalabilidad", "escalabilidad/*"
           ]
         }
       }
@@ -43,7 +43,8 @@
       "Resource": [
         "arn:aws:s3:::bigdata-lalibertad-jheyson-856152566912/processed/*",
         "arn:aws:s3:::bigdata-lalibertad-jheyson-856152566912/curated/*",
-        "arn:aws:s3:::bigdata-lalibertad-jheyson-856152566912/logs/*"
+        "arn:aws:s3:::bigdata-lalibertad-jheyson-856152566912/logs/*",
+        "arn:aws:s3:::bigdata-lalibertad-jheyson-856152566912/escalabilidad/*"
       ]
     },
     {

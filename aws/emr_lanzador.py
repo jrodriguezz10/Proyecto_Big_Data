@@ -11,6 +11,7 @@ import importlib.util
 import os
 import runpy
 import sys
+import time
 
 from pyspark.sql import SparkSession
 
@@ -29,9 +30,11 @@ if evid:
 _stop = SparkSession.stop
 SparkSession.stop = lambda self: None
 sys.argv = [spec.origin]
+t0 = time.perf_counter()
 try:
     runpy.run_path(spec.origin, run_name="__main__")
 finally:
+    print("[lanzador] tiempo del script %s: %.2f s" % (script, time.perf_counter() - t0), flush=True)
     SparkSession.stop = _stop
     spark = SparkSession.getActiveSession()
     if spark is not None:

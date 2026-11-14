@@ -12,6 +12,8 @@ Uso (desde la raiz del proyecto):
     python aws/capturar.py jobs        -> capturas/aws/cap_aws03_jobs.png        (aws/ver_aws03.py)
     python aws/capturar.py salidas     -> capturas/aws/cap_aws03_s3_salidas.png
     python aws/capturar.py metricas    -> capturas/aws/cap_aws03_metricas.png
+    python aws/capturar.py jobs04      -> capturas/aws/cap_aws04_jobs.png        (aws/ver_aws04.py)
+    python aws/capturar.py replicas04  -> capturas/aws/cap_aws04_s3_replicas.png (antes de borrar)
 Las terminales ejecutan "cls" antes del comando. Nunca se muestran claves: sts se consulta con
 --query para mostrar solo cuenta y ARN. Revisar cada PNG antes de versionarlo.
 """
@@ -163,6 +165,9 @@ def main():
         nombre = {"jobs": "cap_aws03_jobs.png", "salidas": "cap_aws03_s3_salidas.png",
                   "metricas": "cap_aws03_metricas.png"}[op]
         terminal("title %s && python aws/ver_aws03.py %s" % (TITULO, op), nombre, espera=15)
+    elif op in ("jobs04", "replicas04"):
+        nombre = {"jobs04": "cap_aws04_jobs.png", "replicas04": "cap_aws04_s3_replicas.png"}[op]
+        terminal("title %s && python aws/ver_aws04.py %s" % (TITULO, op[:-2]), nombre, espera=15)
     elif op == "budget":
         navegador(BUDGETS, "cap_aws02_budget.png", contiene=(PRESUPUESTO, "Budget", "Presupuesto", "Billing", "Facturaci"),
                   pintar=8)

@@ -1,0 +1,168 @@
+{
+ "jobs": [
+  {
+   "nombre": "gen_100X_500X",
+   "id": "00gaa32sepps900f",
+   "estado": "SUCCESS",
+   "oom": false,
+   "dur_s": 97,
+   "script_s": 81.77,
+   "vcpu_h": 0.193,
+   "gb_h": 0.771,
+   "disco_gb_h": 1.928,
+   "costo": 0.0148256635,
+   "detalle": ""
+  },
+  {
+   "nombre": "B_100X_500X",
+   "id": "00gaa35ftdc0c00f",
+   "estado": "SUCCESS",
+   "oom": false,
+   "dur_s": 203,
+   "script_s": 188.34,
+   "vcpu_h": 0.432,
+   "gb_h": 1.729,
+   "disco_gb_h": 4.322,
+   "costo": 0.033204336499999994,
+   "detalle": ""
+  },
+  {
+   "nombre": "A_100X",
+   "id": "00gaa386e3g2uo0f",
+   "estado": "SUCCESS",
+   "oom": false,
+   "dur_s": 497,
+   "script_s": 480.96,
+   "vcpu_h": 1.084,
+   "gb_h": 4.336,
+   "disco_gb_h": 10.839,
+   "costo": 0.083303121,
+   "detalle": ""
+  },
+  {
+   "nombre": "A_500X",
+   "id": "00gaa3dj2ubplo0f",
+   "estado": "SUCCESS",
+   "oom": false,
+   "dur_s": 1850,
+   "script_s": 1835.05,
+   "vcpu_h": 4.092,
+   "gb_h": 16.367,
+   "disco_gb_h": 40.917,
+   "costo": 0.3144559045,
+   "detalle": ""
+  },
+  {
+   "nombre": "gen_1000X",
+   "id": "00gaa3vs0qtf600f",
+   "estado": "SUCCESS",
+   "oom": false,
+   "dur_s": 133,
+   "script_s": 117.05,
+   "vcpu_h": 0.256,
+   "gb_h": 1.024,
+   "disco_gb_h": 2.561,
+   "costo": 0.019673199,
+   "detalle": ""
+  },
+  {
+   "nombre": "B_1000X",
+   "id": "00gaa41t4uig6g0f",
+   "estado": "SUCCESS",
+   "oom": false,
+   "dur_s": 213,
+   "script_s": 197.47,
+   "vcpu_h": 0.452,
+   "gb_h": 1.809,
+   "disco_gb_h": 4.522,
+   "costo": 0.0347412965,
+   "detalle": ""
+  }
+ ],
+ "B": {
+  "100": {
+   "filas": 4567100,
+   "t": 35.38,
+   "spill_mem": "0.0",
+   "spill_disk": "0.0",
+   "estado": "OK"
+  },
+  "500": {
+   "filas": 22835500,
+   "t": 103.11,
+   "spill_mem": "2688.0",
+   "spill_disk": "111.8",
+   "estado": "OK"
+  },
+  "1000": {
+   "filas": 45671000,
+   "t": 142.66,
+   "spill_mem": "5312.0",
+   "spill_disk": "208.4",
+   "estado": "OK"
+  }
+ },
+ "A": {
+  "100": {
+   "nombre": "A_100X",
+   "id": "00gaa386e3g2uo0f",
+   "estado": "SUCCESS",
+   "oom": false,
+   "dur_s": 497,
+   "script_s": 480.96,
+   "vcpu_h": 1.084,
+   "gb_h": 4.336,
+   "disco_gb_h": 10.839,
+   "costo": 0.083303121,
+   "detalle": "",
+   "panel": 19380
+  },
+  "500": {
+   "nombre": "A_500X",
+   "id": "00gaa3dj2ubplo0f",
+   "estado": "SUCCESS",
+   "oom": false,
+   "dur_s": 1850,
+   "script_s": 1835.05,
+   "vcpu_h": 4.092,
+   "gb_h": 16.367,
+   "disco_gb_h": 40.917,
+   "costo": 0.3144559045,
+   "detalle": "",
+   "panel": 19380
+  }
+ },
+ "replicas": {
+  "1000X|replica": [
+   3,
+   7680253564
+  ],
+  "100X|processed": [
+   9,
+   181578
+  ],
+  "100X|raw copiado": [
+   9,
+   88847987
+  ],
+  "100X|replica": [
+   3,
+   763504264
+  ],
+  "500X|processed": [
+   9,
+   182745
+  ],
+  "500X|raw copiado": [
+   9,
+   88847987
+  ],
+  "500X|replica": [
+   3,
+   3837615064
+  ]
+ },
+ "ejecuto_1000": true,
+ "nota_A1000": "no ejecutado por costo y tiempo; A_100X y A_500X bastan para medir el pipeline real a escala (decision del usuario: A_100X tardo 8 min y A_500X 31 min; A_1000X se proyectaba en ~80 min)",
+ "borrado": "2026-11-14 09:20 | 45 versiones de objetos y 0 marcadores de borrado eliminados; quedan 0"
+}

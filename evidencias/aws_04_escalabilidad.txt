@@ -1,0 +1,59 @@
+============================================================================================
+ AWS paso 3b - ESCALABILIDAD EN EMR SERVERLESS (sedalib-spark, emr-7.9.0 / Spark 3.5.5, us-east-2)
+============================================================================================
+Replicas = solo para medir rendimiento. Estan en s3://<bucket>/escalabilidad/ (separado de raw/ y
+processed/ reales) y NO alimentan el modelo. Metodo identico al local: crossJoin(spark.range(N)) + sufijo
+en IDINTERRUPCION sobre las 45671 filas reales de interrupciones.
+Recursos AWS por job: driver + hasta 3 executors de 2 vCPU / 8 GB (8 vCPU / 32 GB en total).
+Recursos locales: Spark local[16], heap del driver 1 GiB (Docker).
+
+1. JOBS (get-job-run; costo real = vCPU-h x 0.052624 + GB-h x 0.0057785 + disco GB-h x 0.000111)
+job            id                 estado        dur(s) script(s)   vCPU-h     GB-h costo USD
+gen_100X_500X  00gaa32sepps900f   SUCCESS           97      81.8   0.1930   0.7710    0.0148
+B_100X_500X    00gaa35ftdc0c00f   SUCCESS          203     188.3   0.4320   1.7290    0.0332
+A_100X         00gaa386e3g2uo0f   SUCCESS          497     481.0   1.0840   4.3360    0.0833
+A_500X         00gaa3dj2ubplo0f   SUCCESS         1850    1835.0   4.0920  16.3670    0.3145
+gen_1000X      00gaa3vs0qtf600f   SUCCESS          133     117.0   0.2560   1.0240    0.0197
+B_1000X        00gaa41t4uig6g0f   SUCCESS          213     197.5   0.4520   1.8090    0.0347
+TOTAL                                             2993             6.5090  26.0360    0.5002
+
+2. TABLA PRINCIPAL - mismo subpipeline (B) local vs AWS: dropDuplicates -> normalizar -> JOIN clima,
+   peligros e infraestructura -> groupBy distrito-mes -> write(noop). Tiempo medido dentro del script.
+escala        filas | LOCAL (Docker)             | AWS (EMR Serverless)       | spill MiB disco MiB
+100X      4,567,100 | 25.87 s (OK, spill)        | 35.38 s (OK)               |       0.0       0.0
+500X     22,835,500 | OOM heap a los 66.41 s     | 103.11 s (OK)              |    2688.0     111.8
+1000X    45,671,000 | no se ejecuto              | 142.66 s (OK)              |    5312.0     208.4
+   (spill AWS: API REST del driver; 'None' = la API no respondio dentro de EMR)
+
+3. SERIE APARTE (A) - src/procesamiento_spark.py SIN CAMBIOS sobre cada replica (pipeline completo:
+   limpieza, clima, peligros, infraestructura, panel distrito-mes con rezagos). Sin equivalente local.
+escala   filas ent. estado        script(s)     job(s)  panel filas costo USD
+100X      4,567,100 SUCCESS           481.0        497        19380    0.0833
+500X     22,835,500 SUCCESS          1835.0       1850        19380    0.3145
+1000X    45,671,000 NO EJECUTADO (ver nota al final)
+   El panel sigue teniendo 19 380 filas (grilla distrito-mes); lo que crece es N_INTERRUPCIONES.
+
+4. REPLICAS EN S3 (antes de borrar; detalle en evidencias/aws_04_replicas_listado.txt)
+   100X processed                9 archivos       0.17 MB
+   100X raw copiado              9 archivos      84.73 MB
+   100X replica                  3 archivos     728.13 MB
+   500X processed                9 archivos       0.17 MB
+   500X raw copiado              9 archivos      84.73 MB
+   500X replica                  3 archivos    3659.83 MB
+   1000X replica                 3 archivos    7324.46 MB
+
+1000X: 500X termino bien en B y A -> se genero 1000X y se corrio SOLO B 1000X (opcion b del usuario);
+       A 1000X: no ejecutado por costo y tiempo; A_100X y A_500X bastan para medir el pipeline
+       real a escala (A_100X tardo 8 min y A_500X 31 min; A_1000X se proyectaba en ~80 min).
+
+5. LECTURA DE RESULTADOS
+* 100X: local 25.87 s vs AWS 35.38 s. Local es mas rapido a esta escala: 16 nucleos en una sola JVM y
+  datos en memoria; EMR tiene 6 nucleos de executors y lee de S3 por red. Aun asi local ya hacia spill (3737 MiB).
+* 500X: local cae por OOM (Java heap space, heap 1 GiB) a los 66.41 s; AWS termina en 103.11 s
+  repartiendo la memoria entre driver y executors (spill 2688.0 MiB, sin fallo). Punto de quiebre local = 500X.
+* Escalado sublineal en AWS (B): de 100X a 1000X los datos crecen 10x y el tiempo 4.0x (35.38 -> 142.66 s).
+* A (pipeline completo): de 100X a 500X los datos crecen 5x y el tiempo 3.8x (481 -> 1835 s); es
+  mucho mas pesado que B (mas fuentes, ventanas para rezagos, varias escrituras parquet a S3).
+* Costo total del paso 3b: 0.5002 USD (A_500X = 63 % del total).
+
+6. BORRADO de s3://<bucket>/escalabilidad/: 2026-11-14 09:20 | 45 versiones de objetos y 0 marcadores de borrado eliminados; quedan 0

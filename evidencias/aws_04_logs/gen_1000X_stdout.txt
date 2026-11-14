@@ -1,0 +1,3 @@
+Filas base (raw/operaciones/sunass_interrupciones.csv): 45671
+[replica] 1000X | filas=45671000 | 96.10 s | s3://<bucket>/escalabilidad/1000X/raw/operaciones/sunass_interrupciones.csv
+[lanzador] tiempo del script emr_generar_replicas.py: 117.05 s

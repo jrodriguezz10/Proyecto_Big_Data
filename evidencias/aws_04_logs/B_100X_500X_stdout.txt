@@ -1,0 +1,24 @@
+
+==============================================================================
+ 5. PRUEBA DE ESCALABILIDAD - SPARK (modo local)
+==============================================================================
+cores=6 | spark.driver.memory=7G | shuffle.partitions=200 | filas base=45671
+->   100X | filas=    4567100 |    35.38 s | mem pico contenedor=     0 MiB | spill mem=      0.0 MiB | spill disco=     0.0 MiB | OK
+->   500X | filas=   22835500 |   103.11 s | mem pico contenedor=     0 MiB | spill mem=   2688.0 MiB | spill disco=   111.8 MiB | OK
+
+(No existe /tmp/sedalib_evid/escalabilidad_pandas.json: ejecute antes pandas_escalabilidad.py)
+
+==============================================================================
+ TABLA FINAL: SPARK vs PANDAS
+==============================================================================
+Spark: modo local[6], heap del driver 1 GiB | pandas: contenedor con limite ?
+escala        filas |   Spark s    mem MiB   spill mem  spill disk |  pandas s    RSS MiB pandas estado
+----------------------------------------------------------------------------------------------------------------
+100X      4,567,100 |     35.38          0         0.0         0.0 |         -          - no ejecutado (se detuvo antes)
+500X     22,835,500 |    103.11          0      2688.0       111.8 |         -          - no ejecutado (se detuvo antes)
+----------------------------------------------------------------------------------------------------------------
+PUNTO DE QUIEBRE pandas : no se alcanzo en las escalas probadas
+PUNTO DE QUIEBRE Spark  : no se alcanzo (completo hasta 500X)
+Etapa con mas spill a disco: stage 49 (escala 500X) -> http://localhost:4040/stages/stage/?id=49&attempt=0
+[lanzador] tiempo del script escalabilidad_spark.py: 188.34 s
+[lanzador] copiado escalabilidad_spark_parcial.json -> s3://bigdata-lalibertad-jheyson-<CUENTA>/curated/escalabilidad/B_100_500/escalabilidad_spark_parcial.json

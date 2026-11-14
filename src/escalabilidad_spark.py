@@ -33,8 +33,10 @@ from comun import norm, titulo
 
 ESCALAS = [int(x) for x in os.environ.get("ESCALAS", "1,10,100,500,1000").split(",")]
 API = "http://localhost:4040/api/v1"
-SALIDA = "/app/evidencias/escalabilidad_spark%s.json" % ("_parcial" if "ESCALAS" in os.environ else "")
-PANDAS = "/app/evidencias/escalabilidad_pandas.json"
+EVID = os.environ.get("SEDALIB_EVID", "/app/evidencias/")    # AWS: carpeta local del driver (aws/emr_lanzador.py)
+SALIDA = EVID + "escalabilidad_spark%s.json" % ("_parcial" if "ESCALAS" in os.environ else "")
+PANDAS = EVID + "escalabilidad_pandas.json"
+CGROUP = "/sys/fs/cgroup/memory.current"   # Docker (cgroup v2); si no existe (p. ej. EMR) la memoria se reporta 0
 KEY_D = ["DEPTO_N", "DIST_N"]
 
 spark = C.spark_session("SEDALIB_Escalabilidad")
@@ -51,7 +53,9 @@ class MonitorMemoria(threading.Thread):
 
     @staticmethod
     def leer():
-        with open("/sys/fs/cgroup/memory.current") as f:
+        if not os.path.exists(CGROUP):
+            return 0
+        with open(CGROUP) as f:
             uso = int(f.read())
         with open("/sys/fs/cgroup/memory.stat") as f:
             inactive = next(int(l.split()[1]) for l in f if l.startswith("inactive_file "))
