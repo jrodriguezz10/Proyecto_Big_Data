@@ -1,0 +1,134 @@
+26/11/14 20:11:58 WARN VersionInfoUtils: The AWS SDK for Java 1.x entered maintenance mode starting July 31, 2024 and will reach end of support on December 31, 2025. For more information, see https://aws.amazon.com/blogs/developer/the-aws-sdk-for-java-1-x-is-in-maintenance-mode-effective-july-31-2024/
+You can print where on the file system the AWS SDK for Java 1.x core runtime is located by setting the AWS_JAVA_V1_PRINT_LOCATION environment variable or aws.java.v1.printLocation system property to 'true'.
+This message can be disabled by setting the AWS_JAVA_V1_DISABLE_DEPRECATION_ANNOUNCEMENT environment variable or aws.java.v1.disableDeprecationAnnouncement system property to 'true'.
+The AWS SDK for Java 1.x is being used here:
+at java.base/java.lang.Thread.getStackTrace(Thread.java:1619)
+at com.amazonaws.util.VersionInfoUtils.printDeprecationAnnouncement(VersionInfoUtils.java:81)
+at com.amazonaws.util.VersionInfoUtils.<clinit>(VersionInfoUtils.java:59)
+at com.amazonaws.internal.EC2ResourceFetcher.<clinit>(EC2ResourceFetcher.java:44)
+at com.amazonaws.auth.ContainerCredentialsFetcher.getCredentialsResponse(ContainerCredentialsFetcher.java:41)
+at com.amazonaws.auth.BaseCredentialsFetcher.fetchCredentials(BaseCredentialsFetcher.java:159)
+at com.amazonaws.auth.BaseCredentialsFetcher.getCredentials(BaseCredentialsFetcher.java:100)
+at com.amazonaws.auth.ContainerCredentialsProvider.getCredentials(ContainerCredentialsProvider.java:111)
+at com.amazonaws.auth.EC2ContainerCredentialsProviderWrapper.getCredentials(EC2ContainerCredentialsProviderWrapper.java:77)
+at com.amazonaws.auth.AWSCredentialsProviderChain.getCredentials(AWSCredentialsProviderChain.java:118)
+at com.amazon.ws.emr.hadoop.fs.shaded.com.amazonaws.auth.AWSCredentialsProviderChain.getCredentials(AWSCredentialsProviderChain.java:118)
+at com.amazon.ws.emr.hadoop.fs.shaded.com.amazonaws.http.AmazonHttpClient$RequestExecutor.getCredentialsFromContext(AmazonHttpClient.java:1269)
+at com.amazon.ws.emr.hadoop.fs.shaded.com.amazonaws.http.AmazonHttpClient$RequestExecutor.runBeforeRequestHandlers(AmazonHttpClient.java:845)
+at com.amazon.ws.emr.hadoop.fs.shaded.com.amazonaws.http.AmazonHttpClient$RequestExecutor.doExecute(AmazonHttpClient.java:794)
+at com.amazon.ws.emr.hadoop.fs.shaded.com.amazonaws.http.AmazonHttpClient$RequestExecutor.executeWithTimer(AmazonHttpClient.java:781)
+at com.amazon.ws.emr.hadoop.fs.shaded.com.amazonaws.http.AmazonHttpClient$RequestExecutor.execute(AmazonHttpClient.java:755)
+at com.amazon.ws.emr.hadoop.fs.shaded.com.amazonaws.http.AmazonHttpClient$RequestExecutor.access$500(AmazonHttpClient.java:715)
+at com.amazon.ws.emr.hadoop.fs.shaded.com.amazonaws.http.AmazonHttpClient$RequestExecutionBuilderImpl.execute(AmazonHttpClient.java:697)
+at com.amazon.ws.emr.hadoop.fs.shaded.com.amazonaws.http.AmazonHttpClient.execute(AmazonHttpClient.java:561)
+at com.amazon.ws.emr.hadoop.fs.shaded.com.amazonaws.http.AmazonHttpClient.execute(AmazonHttpClient.java:541)
+at com.amazon.ws.emr.hadoop.fs.shaded.com.amazonaws.services.s3.AmazonS3Client.invoke(AmazonS3Client.java:5558)
+at com.amazon.ws.emr.hadoop.fs.shaded.com.amazonaws.services.s3.AmazonS3Client.getBucketRegionViaHeadRequest(AmazonS3Client.java:6539)
+at com.amazon.ws.emr.hadoop.fs.shaded.com.amazonaws.services.s3.AmazonS3Client.fetchRegionFromCache(AmazonS3Client.java:6511)
+at com.amazon.ws.emr.hadoop.fs.shaded.com.amazonaws.services.s3.AmazonS3Client.invoke(AmazonS3Client.java:5543)
+at com.amazon.ws.emr.hadoop.fs.shaded.com.amazonaws.services.s3.AmazonS3Client.invoke(AmazonS3Client.java:5505)
+at com.amazon.ws.emr.hadoop.fs.shaded.com.amazonaws.services.s3.AmazonS3Client.getObjectMetadata(AmazonS3Client.java:1403)
+at com.amazon.ws.emr.hadoop.fs.s3.lite.call.GetObjectMetadataCall.perform(GetObjectMetadataCall.java:26)
+at com.amazon.ws.emr.hadoop.fs.s3.lite.call.GetObjectMetadataCall.perform(GetObjectMetadataCall.java:12)
+at com.amazon.ws.emr.hadoop.fs.s3.lite.executor.GlobalS3Executor$CallPerformer.call(GlobalS3Executor.java:114)
+at com.amazon.ws.emr.hadoop.fs.s3.lite.executor.GlobalS3Executor.execute(GlobalS3Executor.java:141)
+at com.amazon.ws.emr.hadoop.fs.s3.lite.AmazonS3LiteClient.invoke(AmazonS3LiteClient.java:196)
+at com.amazon.ws.emr.hadoop.fs.s3.lite.AmazonS3LiteClient.invoke(AmazonS3LiteClient.java:191)
+at com.amazon.ws.emr.hadoop.fs.s3.lite.AmazonS3LiteClient.getObjectMetadata(AmazonS3LiteClient.java:96)
+at com.amazon.ws.emr.hadoop.fs.s3.lite.AbstractAmazonS3Lite.getObjectMetadata(AbstractAmazonS3Lite.java:43)
+at com.amazon.ws.emr.hadoop.fs.s3n.Jets3tNativeFileSystemStore.getFileMetadataFromCacheOrS3(Jets3tNativeFileSystemStore.java:674)
+at com.amazon.ws.emr.hadoop.fs.s3n.Jets3tNativeFileSystemStore.retrieveMetadata(Jets3tNativeFileSystemStore.java:326)
+at com.amazon.ws.emr.hadoop.fs.s3n.S3NativeFileSystem.getFileStatus(S3NativeFileSystem.java:548)
+at org.apache.hadoop.fs.Globber.getFileStatus(Globber.java:169)
+at org.apache.hadoop.fs.Globber.doGlob(Globber.java:580)
+at org.apache.hadoop.fs.Globber.glob(Globber.java:256)
+at org.apache.hadoop.fs.FileSystem.globStatus(FileSystem.java:2287)
+at com.amazon.ws.emr.hadoop.fs.EmrFileSystem.globStatus(EmrFileSystem.java:461)
+at org.apache.spark.util.DependencyUtils$.resolveGlobPath(DependencyUtils.scala:318)
+at org.apache.spark.util.DependencyUtils$.$anonfun$resolveGlobPaths$2(DependencyUtils.scala:273)
+at org.apache.spark.util.DependencyUtils$.$anonfun$resolveGlobPaths$2$adapted(DependencyUtils.scala:271)
+at scala.collection.TraversableLike.$anonfun$flatMap$1(TraversableLike.scala:293)
+at scala.collection.IndexedSeqOptimized.foreach(IndexedSeqOptimized.scala:36)
+at scala.collection.IndexedSeqOptimized.foreach$(IndexedSeqOptimized.scala:33)
+at scala.collection.mutable.WrappedArray.foreach(WrappedArray.scala:38)
+at scala.collection.TraversableLike.flatMap(TraversableLike.scala:293)
+at scala.collection.TraversableLike.flatMap$(TraversableLike.scala:290)
+at scala.collection.AbstractTraversable.flatMap(Traversable.scala:108)
+at org.apache.spark.util.DependencyUtils$.resolveGlobPaths(DependencyUtils.scala:271)
+at org.apache.spark.deploy.SparkSubmit.$anonfun$prepareSubmitEnvironment$6(SparkSubmit.scala:403)
+at scala.Option.map(Option.scala:230)
+at org.apache.spark.deploy.SparkSubmit.prepareSubmitEnvironment(SparkSubmit.scala:403)
+at org.apache.spark.deploy.SparkSubmit.org$apache$spark$deploy$SparkSubmit$$runMain(SparkSubmit.scala:1053)
+at org.apache.spark.deploy.SparkSubmit.doRunMain$1(SparkSubmit.scala:200)
+at org.apache.spark.deploy.SparkSubmit.submit(SparkSubmit.scala:223)
+at org.apache.spark.deploy.SparkSubmit.doSubmit(SparkSubmit.scala:92)
+at org.apache.spark.deploy.SparkSubmit$$anon$2.doSubmit(SparkSubmit.scala:1212)
+at org.apache.spark.deploy.SparkSubmit$.main(SparkSubmit.scala:1221)
+at org.apache.spark.deploy.SparkSubmit.main(SparkSubmit.scala)
+Files s3://<bucket>/scripts/comun.py from /tmp/spark-55b7d04b-6510-4f1a-8330-5ae1cacd14e8/comun.py to /home/hadoop/comun.py
+Files s3://<bucket>/scripts/gold.py from /tmp/spark-55b7d04b-6510-4f1a-8330-5ae1cacd14e8/gold.py to /home/hadoop/gold.py
+26/11/14 20:12:00 INFO EMRParamSideChannel: Setting FGAC mode to false
+26/11/14 20:12:00 INFO SparkContext: Running Spark version 3.5.5-amzn-0
+26/11/14 20:12:00 INFO SparkContext: OS info Linux, 6.1.189, amd64
+26/11/14 20:12:00 INFO SparkContext: Java version 17.0.20.1
+26/11/14 20:12:00 INFO ResourceUtils: ==============================================================
+26/11/14 20:12:00 INFO ResourceUtils: No custom resources configured for spark.driver.
+26/11/14 20:12:00 INFO ResourceUtils: ==============================================================
+26/11/14 20:12:00 INFO SparkContext: Submitted application: SEDALIB_Gold
+26/11/14 20:12:00 INFO ResourceProfile: Default ResourceProfile created, executor resources: Map(executorType -> name: executorType, amount: 1, script: , vendor: , cores -> name: cores, amount: 2, script: , vendor: , memory -> name: memory, amount: 7168, script: , vendor: , offHeap -> name: offHeap, amount: 0, script: , vendor: ), task resources: Map(cpus -> name: cpus, amount: 1.0)
+26/11/14 20:12:00 INFO ResourceProfile: Limiting resource is cpus at 2 tasks per executor
+26/11/14 20:12:00 INFO ResourceProfileManager: Added ResourceProfile id: 0
+26/11/14 20:12:00 INFO ResourceProfile: User executor ResourceProfile created, executor resources: Map(executorType -> name: executorType, amount: 1, script: , vendor: , cores -> name: cores, amount: 2, script: , vendor: , memory -> name: memory, amount: 7168, script: , vendor: , offHeap -> name: offHeap, amount: 0, script: , vendor: ), task resources: Map(cpus -> name: cpus, amount: 1.0)
+26/11/14 20:12:00 INFO ResourceProfile: Limiting resource is cpus at 2 tasks per executor
+26/11/14 20:12:00 INFO ResourceProfileManager: Added ResourceProfile id: 1
+26/11/14 20:12:01 INFO SecurityManager: Changing view acls to: hadoop
+26/11/14 20:12:01 INFO SecurityManager: Changing modify acls to: hadoop
+26/11/14 20:12:01 INFO SecurityManager: Changing view acls groups to: 
+26/11/14 20:12:01 INFO SecurityManager: Changing modify acls groups to: 
+26/11/14 20:12:01 INFO SecurityManager: SecurityManager: authentication enabled; ui acls disabled; users with view permissions: hadoop; groups with view permissions: EMPTY; users with modify permissions: hadoop; groups with modify permissions: EMPTY
+26/11/14 20:12:01 INFO Utils: Successfully started service 'sparkDriver' on port 40343.
+26/11/14 20:12:01 INFO SparkEnv: Registering MapOutputTracker
+26/11/14 20:12:01 INFO SparkEnv: Registering BlockManagerMaster
+26/11/14 20:12:01 INFO BlockManagerMasterEndpoint: Using org.apache.spark.storage.DefaultTopologyMapper for getting topology information
+26/11/14 20:12:01 INFO BlockManagerMasterEndpoint: BlockManagerMasterEndpoint up
+26/11/14 20:12:01 INFO SparkEnv: Registering BlockManagerMasterHeartbeat
+26/11/14 20:12:01 INFO DiskBlockManager: Created local directory at /tmp/blockmgr-6e9b85e9-3e01-48f7-84fb-f221f6d35d1c
+26/11/14 20:12:01 INFO MemoryStore: MemoryStore started with capacity 4.0 GiB
+26/11/14 20:12:01 INFO SparkEnv: Registering OutputCommitCoordinator
+26/11/14 20:12:01 INFO SubResultCacheManager: Sub-result caches are disabled.
+26/11/14 20:12:01 INFO JettyUtils: Start Jetty 0.0.0.0:4040 for SparkUI
+26/11/14 20:12:01 INFO Utils: Successfully started service 'SparkUI' on port 4040.
+26/11/14 20:12:01 INFO SparkContext: Added file file:/tmp/spark-55b7d04b-6510-4f1a-8330-5ae1cacd14e8/comun.py at spark://[2600:1f16:1232:b000:beaf:a290:88ca:17c4]:40343/files/comun.py with timestamp 1794687120901
+26/11/14 20:12:01 INFO Utils: Copying /tmp/spark-55b7d04b-6510-4f1a-8330-5ae1cacd14e8/comun.py to /tmp/spark-5dcf031a-5e7d-4e93-b584-ce86588a058a/userFiles-c475be31-763b-4dba-bb66-6ca81aec1a6f/comun.py
+26/11/14 20:12:01 INFO SparkContext: Added file file:/tmp/spark-55b7d04b-6510-4f1a-8330-5ae1cacd14e8/gold.py at spark://[2600:1f16:1232:b000:beaf:a290:88ca:17c4]:40343/files/gold.py with timestamp 1794687120901
+26/11/14 20:12:01 INFO Utils: Copying /tmp/spark-55b7d04b-6510-4f1a-8330-5ae1cacd14e8/gold.py to /tmp/spark-5dcf031a-5e7d-4e93-b584-ce86588a058a/userFiles-c475be31-763b-4dba-bb66-6ca81aec1a6f/gold.py
+26/11/14 20:12:02 INFO Utils: Using initial executors = 3, max of spark.dynamicAllocation.initialExecutors, spark.dynamicAllocation.minExecutors and spark.executor.instances
+26/11/14 20:12:02 INFO ExecutorContainerAllocator: Set total expected execs to {0=3}
+26/11/14 20:12:02 INFO Utils: Successfully started service 'org.apache.spark.network.netty.NettyBlockTransferService' on port 39291.
+26/11/14 20:12:02 INFO NettyBlockTransferService: Server created on [2600:1f16:1232:b000:beaf:a290:88ca:17c4]:39291
+26/11/14 20:12:02 INFO BlockManager: Using org.apache.spark.storage.RandomBlockReplicationPolicy for block replication policy
+26/11/14 20:12:02 INFO BlockManagerMaster: Registering BlockManager BlockManagerId(driver, [2600:1f16:1232:b000:beaf:a290:88ca:17c4], 39291, None)
+26/11/14 20:12:02 INFO BlockManagerMasterEndpoint: Registering block manager [2600:1f16:1232:b000:beaf:a290:88ca:17c4]:39291 with 4.0 GiB RAM, BlockManagerId(driver, [2600:1f16:1232:b000:beaf:a290:88ca:17c4], 39291, None)
+26/11/14 20:12:02 INFO ExecutorContainerAllocator: Going to request 3 executors for ResourceProfile Id: 0, target: 3 already provisioned: 0.
+26/11/14 20:12:02 INFO BlockManagerMaster: Registered BlockManager BlockManagerId(driver, [2600:1f16:1232:b000:beaf:a290:88ca:17c4], 39291, None)
+26/11/14 20:12:02 INFO BlockManager: Initialized BlockManager: BlockManagerId(driver, [2600:1f16:1232:b000:beaf:a290:88ca:17c4], 39291, None)
+26/11/14 20:12:02 INFO TimeBasedRotatingEventLogFilesWriter: rotationIntervalInSeconds = 300, eventFileMinSize = 1048576, maxFilesToRetain = 2
+26/11/14 20:12:02 INFO DefaultEmrServerlessRMClient: Creating containers with container role SPARK_EXECUTOR and keys: Set(1, 2, 3)
+26/11/14 20:12:02 INFO TimeBasedRotatingEventLogFilesWriter: Logging events to file:/var/log/spark/apps/eventlog_v2_00gaaacm22mo480f/00gaaacm22mo480f.inprogress
+26/11/14 20:12:03 INFO Utils: Using initial executors = 3, max of spark.dynamicAllocation.initialExecutors, spark.dynamicAllocation.minExecutors and spark.executor.instances
+26/11/14 20:12:03 INFO ExecutorAllocationManager: Dynamic allocation is enabled without a shuffle service.
+26/11/14 20:12:03 INFO ExecutorContainerAllocator: Set total expected execs to {0=3}
+26/11/14 20:12:03 INFO DefaultEmrServerlessRMClient: Containers created with container role SPARK_EXECUTOR. key to container id map: Map(2 -> a4d0edd7-93d7-1367-7254-d64066151aac, 1 -> b0d0edd7-93de-6d78-86ab-42b69c72b941, 3 -> b0d0edd7-93ce-1b98-bbe4-1eb176b7575a)
+26/11/14 20:12:09 INFO EmrServerlessClusterSchedulerBackend$EmrServerlessDriverEndpoint: No executor found for 2600:1f16:1232:b000:208f:a860:9803:58b:46894
+26/11/14 20:12:09 INFO EmrServerlessClusterSchedulerBackend$EmrServerlessDriverEndpoint: No executor found for 2600:1f16:1232:b000:f171:24c3:db34:d5cb:60724
+26/11/14 20:12:09 INFO EmrServerlessClusterSchedulerBackend$EmrServerlessDriverEndpoint: Registered executor NettyRpcEndpointRef(spark-client://Executor) (2600:1f16:1232:b000:208f:a860:9803:58b:46906) with ID 2,  ResourceProfileId 0
+26/11/14 20:12:09 INFO ExecutorMonitor: New executor 2 has registered (new total is 1)
+26/11/14 20:12:09 INFO BlockManagerMasterEndpoint: Registering block manager [2600:1f16:1232:b000:208f:a860:9803:58b]:35207 with 3.8 GiB RAM, BlockManagerId(2, [2600:1f16:1232:b000:208f:a860:9803:58b], 35207, None)
+26/11/14 20:12:10 INFO EmrServerlessClusterSchedulerBackend$EmrServerlessDriverEndpoint: No executor found for 2600:1f16:1232:b000:169:cdc3:eda5:f930:38940
+26/11/14 20:12:10 INFO EmrServerlessClusterSchedulerBackend$EmrServerlessDriverEndpoint: Registered executor NettyRpcEndpointRef(spark-client://Executor) (2600:1f16:1232:b000:f171:24c3:db34:d5cb:60736) with ID 1,  ResourceProfileId 0
+26/11/14 20:12:10 INFO ExecutorMonitor: New executor 1 has registered (new total is 2)
+26/11/14 20:12:10 INFO BlockManagerMasterEndpoint: Registering block manager [2600:1f16:1232:b000:f171:24c3:db34:d5cb]:37649 with 3.8 GiB RAM, BlockManagerId(1, [2600:1f16:1232:b000:f171:24c3:db34:d5cb], 37649, None)
+26/11/14 20:12:10 INFO EmrServerlessClusterSchedulerBackend$EmrServerlessDriverEndpoint: Registered executor NettyRpcEndpointRef(spark-client://Executor) (2600:1f16:1232:b000:169:cdc3:eda5:f930:38946) with ID 3,  ResourceProfileId 0
+26/11/14 20:12:10 INFO ExecutorMonitor: New executor 3 has registered (new total is 3)
+26/11/14 20:12:10 INFO EmrServerlessClusterSchedulerBackend: SchedulerBackend is ready for scheduling beginning after reached minRegisteredResourcesRatio: 0.8
+26/11/14 20:12:10 INFO BlockManagerMasterEndpoint: Registering block manager [2600:1f16:1232:b000:169:cdc3:eda5:f930]:34909 with 3.8 GiB RAM, BlockManagerId(3, [2600:1f16:1232:b000:169:cdc3:eda5:f930], 34909, None)

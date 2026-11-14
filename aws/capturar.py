@@ -14,6 +14,10 @@ Uso (desde la raiz del proyecto):
     python aws/capturar.py metricas    -> capturas/aws/cap_aws03_metricas.png
     python aws/capturar.py jobs04      -> capturas/aws/cap_aws04_jobs.png        (aws/ver_aws04.py)
     python aws/capturar.py replicas04  -> capturas/aws/cap_aws04_s3_replicas.png (antes de borrar)
+    python aws/capturar.py glue05      -> capturas/aws/cap_aws05_glue_tablas.png  (aws/ver_aws05.py glue)
+    python aws/capturar.py athena05    -> capturas/aws/cap_aws05_athena.png       (aws/ver_aws05.py athena)
+    python aws/capturar.py dashboard   -> capturas/cap14_dashboard.png (Edge en modo app, sin pestanas ni URL;
+                                          requiere "streamlit run dashboard/app.py" en el puerto 8501)
 Las terminales ejecutan "cls" antes del comando. Nunca se muestran claves: sts se consulta con
 --query para mostrar solo cuenta y ARN. Revisar cada PNG antes de versionarlo.
 """
@@ -131,6 +135,72 @@ def navegador(url, nombre, contiene=(BUCKET,), espera=8, maximo=45, pintar=4):
     capturar_ventana(hwnd, nombre)
 
 
+def capturar_contenido(hwnd, ruta):
+    """Captura SOLO el contenido de la ventana con PrintWindow(PW_RENDERFULLCONTENT): no lee pixeles de la
+    pantalla, asi otras ventanas encima (videollamadas, notificaciones, barra de tareas) nunca salen."""
+    gdi32 = ctypes.windll.gdi32
+    r = RECT()
+    user32.GetWindowRect(hwnd, ctypes.byref(r))
+    w, h = r.right - r.left, r.bottom - r.top
+    hdc_v = user32.GetWindowDC(hwnd)
+    hdc = gdi32.CreateCompatibleDC(hdc_v)
+    bmp = gdi32.CreateCompatibleBitmap(hdc_v, w, h)
+    gdi32.SelectObject(hdc, bmp)
+    ok = user32.PrintWindow(hwnd, hdc, 2)
+
+    class BIH(ctypes.Structure):
+        _fields_ = [("biSize", ctypes.c_uint32), ("biWidth", ctypes.c_int32), ("biHeight", ctypes.c_int32),
+                    ("biPlanes", ctypes.c_uint16), ("biBitCount", ctypes.c_uint16), ("biCompression", ctypes.c_uint32),
+                    ("biSizeImage", ctypes.c_uint32), ("x", ctypes.c_int32), ("y", ctypes.c_int32),
+                    ("c1", ctypes.c_uint32), ("c2", ctypes.c_uint32)]
+    bih = BIH(ctypes.sizeof(BIH), w, -h, 1, 32, 0, 0, 0, 0, 0, 0)
+    buf = ctypes.create_string_buffer(w * h * 4)
+    gdi32.GetDIBits(hdc, bmp, 0, h, buf, ctypes.byref(bih), 0)
+    gdi32.DeleteObject(bmp); gdi32.DeleteDC(hdc); user32.ReleaseDC(hwnd, hdc_v)
+    if not ok:
+        sys.exit("PrintWindow fallo: no se guarda captura")
+    bgra = buf.raw
+    rgb = bytearray(w * h * 3)
+    rgb[0::3], rgb[1::3], rgb[2::3] = bgra[2::4], bgra[1::4], bgra[0::4]
+    os.makedirs(os.path.dirname(ruta), exist_ok=True)
+    mss.tools.to_png(bytes(rgb), (w, h), output=ruta)
+    print("Guardado: %s (%dx%d, PrintWindow)" % (os.path.relpath(ruta, BASE), w, h))
+
+
+def dashboard(url="http://localhost:8501/", titulo="SEDALIB - riesgo", nombre="cap14_dashboard.png", escala="0.8"):
+    """Abre el dashboard en Edge modo app con un PERFIL TEMPORAL (sin pestanas, URL, extensiones ni
+    notificaciones del perfil del usuario), escala 80 % para que entre completo, captura en capturas/
+    y cierra esa ventana. El perfil temporal se crea en %TEMP% y no toca el navegador del usuario."""
+    import tempfile
+    edge = next(p for p in (r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+                            r"C:\Program Files\Microsoft\Edge\Application\msedge.exe") if os.path.exists(p))
+    perfil = tempfile.mkdtemp(prefix="sedalib_cap_edge_")
+    proc = subprocess.Popen([edge, "--user-data-dir=" + perfil, "--app=" + url, "--no-first-run",
+                             "--no-default-browser-check", "--disable-notifications", "--disable-translate",
+                             "--disable-features=Translate,msEdgeTranslate,msUndersideButton,CalculateNativeWinOcclusion",
+                             "--disable-backgrounding-occluded-windows", "--disable-renderer-backgrounding", "--lang=es",
+                             "--force-device-scale-factor=" + escala, "--window-position=-4000,0",
+                             "--window-size=1920,1040"])
+    hwnd = buscar_ventana(titulo, timeout=60)
+    if not hwnd:
+        sys.exit("No se abrio la ventana del dashboard")
+    for _ in range(3):                             # fuera de pantalla, tamano fijo, sin activar ni cambiar el orden Z
+        user32.SetWindowPos(hwnd, 0, -4000, 0, 1920, 1040, 0x0014)
+        time.sleep(1)
+    time.sleep(14)                                 # Streamlit carga datos y dibuja los graficos
+    r = RECT()
+    user32.GetWindowRect(hwnd, ctypes.byref(r))
+    if r.right - r.left < 1000:
+        user32.PostMessageW(hwnd, 0x0010, 0, 0)
+        sys.exit("La ventana no tomo el tamano pedido (%dx%d): no se captura" % (r.right - r.left, r.bottom - r.top))
+    capturar_contenido(hwnd, os.path.join(BASE, "capturas", nombre))
+    user32.PostMessageW(hwnd, 0x0010, 0, 0)
+    try:
+        proc.wait(timeout=15)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+
+
 def main():
     if len(sys.argv) != 2:
         sys.exit(__doc__)
@@ -168,6 +238,11 @@ def main():
     elif op in ("jobs04", "replicas04"):
         nombre = {"jobs04": "cap_aws04_jobs.png", "replicas04": "cap_aws04_s3_replicas.png"}[op]
         terminal("title %s && python aws/ver_aws04.py %s" % (TITULO, op[:-2]), nombre, espera=15)
+    elif op in ("glue05", "athena05"):
+        nombre = {"glue05": "cap_aws05_glue_tablas.png", "athena05": "cap_aws05_athena.png"}[op]
+        terminal("title %s && python aws/ver_aws05.py %s" % (TITULO, op[:-2]), nombre, espera=15)
+    elif op == "dashboard":
+        dashboard()
     elif op == "budget":
         navegador(BUDGETS, "cap_aws02_budget.png", contiene=(PRESUPUESTO, "Budget", "Presupuesto", "Billing", "Facturaci"),
                   pintar=8)

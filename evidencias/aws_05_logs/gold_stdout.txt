@@ -1,0 +1,52 @@
+
+==============================================================================
+ 5.1 PREDICCION FUERA DE MUESTRA M1-GBT (5 entrenamientos, umbral fijo 0.1084)
+==============================================================================
+cv_2022-S1    entrena T<2022-01 (n=9690) | predice 2022-01..2022-06 n=1938 positivos=788 alertas=1208
+cv_2022-S2    entrena T<2022-07 (n=11628) | predice 2022-07..2022-12 n=1938 positivos=833 alertas=1242
+cv_2023-S1    entrena T<2023-01 (n=13566) | predice 2023-01..2023-06 n=1938 positivos=808 alertas=1281
+cv_2023-S2    entrena T<2023-07 (n=15504) | predice 2023-07..2023-12 n=1938 positivos=949 alertas=1279
+holdout_2024  entrena T<2024-01 (n=17442) | predice 2024-01..2024-05 n=1615 positivos=626 alertas=1193
+/tmp/spark-55b7d04b-6510-4f1a-8330-5ae1cacd14e8/gold.py:87: DeprecationWarning: `trapz` is deprecated. Use `trapezoid` instead, or one of the numerical integration functions in `scipy.integrate`.
+  return float(np.trapz(np.r_[prec[0], prec], np.r_[0.0, rec]))
+
+Control holdout 2024 nacional: AUC-PR M1-GBT = 0.7248 (esperado 0.7248, tolerancia 0.001) -> OK
+
+==============================================================================
+ 5.2 DIMENSIONES
+==============================================================================
+INEI UBIGEO 2022: 1891 distritos | panel: 323 distritos | con >1 provincia en SUNASS: 16 (se toma la mas frecuente)
+   ubigeo por SIN UBIGEO          : 1
+   ubigeo por depto+dist (unico)  : 2
+   ubigeo por depto+prov+dist     : 320
+Distritos SIN ubigeo:
+   ICA / NAZCA / NAZCA
+
+==============================================================================
+ 5.3 COMPARACION DE MODELOS - HOLDOUT 2024-01..05
+==============================================================================
+ambito       modelo              n  pos  AUC-PR AUC-ROC  umbral    prec  recall    TP    FP    FN    TN
+/tmp/spark-55b7d04b-6510-4f1a-8330-5ae1cacd14e8/gold.py:95: DeprecationWarning: `trapz` is deprecated. Use `trapezoid` instead, or one of the numerical integration functions in `scipy.integrate`.
+  return float(np.trapz(np.r_[0.0, tp / P, 1.0], np.r_[0.0, fp / N, 1.0]))
+NACIONAL     M1-GBT           1615  626  0.7248  0.8138  0.1084  0.4895  0.9329   584   609    42   380
+NACIONAL     Tasa historica   1615  626  0.6858  0.7907  0.1111  0.4912  0.9377   587   608    39   381
+NACIONAL     Regla ingenua    1615  626  0.5819  0.7267  1.0000  0.6076  0.7668   480   310   146   679
+LA LIBERTAD  M1-GBT             65   28  0.6270  0.7645  0.1084  0.5682  0.8929    25    19     3    18
+LA LIBERTAD  Tasa historica     65   28  0.7336  0.8161  0.1111  0.6500  0.9286    26    14     2    23
+LA LIBERTAD  Regla ingenua      65   28  0.6050  0.6863  1.0000  0.6429  0.6429    18    10    10    27
+
+==============================================================================
+ 5.4 ESCRITURA EN curated/gold/ (Parquet, 1 archivo por tabla)
+==============================================================================
+gold_riesgo_distrito_mes     9367 filas | ubigeo:string, departamento:string, distrito:string, anio:int, mes:int, prob_interrupcion:double, alerta:int, interrupcion_real:int
+dim_distrito                  323 filas | ubigeo:string, departamento:string, provincia:string, distrito:string, n_peligros:int, cobertura_clima:double
+dim_tiempo                     29 filas | anio:int, mes:int, trimestre:int, temporada_lluvia:int
+gold_kpi_mensual              754 filas | anio:int, mes:int, departamento:string, es_la_libertad:int, n_distritos:bigint, distritos_con_interrupcion:bigint, tasa_interrupcion:double, distritos_en_alerta:bigint, tp:bigint, fp:bigint, fn:bigint, precision_alertas:double, recall_alertas:double
+gold_comparacion_modelos        6 filas | conjunto:string, ambito:string, modelo:string, n:bigint, positivos:bigint, auc_pr:double, auc_roc:double, umbral:double, precision:double, recall:double, tp:bigint, fp:bigint, fn:bigint, tn:bigint
+
+==============================================================================
+ 5.5 RESUMEN
+==============================================================================
+Hechos: 9367 filas distrito-mes (2022-01..2024-05) | alertas=6203 | meses con interrupcion real=4004
+Datos personales: ninguno (panel agregado distrito-mes; sin IDs ni nombres de personas).
+[lanzador] tiempo del script gold.py: 183.10 s

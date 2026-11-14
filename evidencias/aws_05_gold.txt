@@ -1,0 +1,103 @@
+============================================================================================
+ AWS paso 4 - CAPA GOLD en EMR Serverless (sedalib-spark, emr-7.9.0 / Spark 3.5.5, us-east-2)
+============================================================================================
+Referencia de ubigeo: INEI, UBIGEO 2022 - 1891 distritos (Plataforma Nacional de Datos Abiertos)
+   URL de descarga : https://www.inei.gob.pe/media/DATOS_ABIERTOS/UBIGEOS/UBIGEOS_2022_1891_distritos.zip
+   pagina          : https://www.datosabiertos.gob.pe/dataset/ubigeos-c%C3%B3digos-de-ubicaci%C3%B3n-geogr%C3%A1fica-instituto-nacional-de-estad%C3%ADstica-e-inform%C3%A1tica-inei
+   descargado el   : 2026-11-14 | archivo UBIGEOS_2022_1891_distritos.csv (ISO-8859-1, ';') -> raw/referencia/ubigeo_inei_2022.csv
+subido scripts/comun.py
+subido scripts/gold.py
+subido scripts/emr_lanzador.py
+subido raw/referencia/ubigeo_inei_2022.csv
+job sedalib-05-gold lanzado: 00gaaacm22mo480f
+
+1. JOB (get-job-run; costo real = vCPU-h x 0.052624 + GB-h x 0.0057785 + disco GB-h x 0.000111)
+job              id                 estado     dur(s) script(s)   vCPU-h     GB-h  real USD fact. USD
+sedalib-05-gold  00gaaacm22mo480f   SUCCESS       199     183.1   0.4200   1.6800    0.0323    0.0318
+
+2. SALIDA DEL SCRIPT src/gold.py (stdout del driver)
+
+==============================================================================
+ 5.1 PREDICCION FUERA DE MUESTRA M1-GBT (5 entrenamientos, umbral fijo 0.1084)
+==============================================================================
+cv_2022-S1    entrena T<2022-01 (n=9690) | predice 2022-01..2022-06 n=1938 positivos=788 alertas=1208
+cv_2022-S2    entrena T<2022-07 (n=11628) | predice 2022-07..2022-12 n=1938 positivos=833 alertas=1242
+cv_2023-S1    entrena T<2023-01 (n=13566) | predice 2023-01..2023-06 n=1938 positivos=808 alertas=1281
+cv_2023-S2    entrena T<2023-07 (n=15504) | predice 2023-07..2023-12 n=1938 positivos=949 alertas=1279
+holdout_2024  entrena T<2024-01 (n=17442) | predice 2024-01..2024-05 n=1615 positivos=626 alertas=1193
+/tmp/spark-55b7d04b-6510-4f1a-8330-5ae1cacd14e8/gold.py:87: DeprecationWarning: `trapz` is deprecated. Use `trapezoid` instead, or one of the numerical integration functions in `scipy.integrate`.
+  return float(np.trapz(np.r_[prec[0], prec], np.r_[0.0, rec]))
+
+Control holdout 2024 nacional: AUC-PR M1-GBT = 0.7248 (esperado 0.7248, tolerancia 0.001) -> OK
+
+==============================================================================
+ 5.2 DIMENSIONES
+==============================================================================
+INEI UBIGEO 2022: 1891 distritos | panel: 323 distritos | con >1 provincia en SUNASS: 16 (se toma la mas frecuente)
+   ubigeo por SIN UBIGEO          : 1
+   ubigeo por depto+dist (unico)  : 2
+   ubigeo por depto+prov+dist     : 320
+Distritos SIN ubigeo:
+   ICA / NAZCA / NAZCA
+
+==============================================================================
+ 5.3 COMPARACION DE MODELOS - HOLDOUT 2024-01..05
+==============================================================================
+ambito       modelo              n  pos  AUC-PR AUC-ROC  umbral    prec  recall    TP    FP    FN    TN
+/tmp/spark-55b7d04b-6510-4f1a-8330-5ae1cacd14e8/gold.py:95: DeprecationWarning: `trapz` is deprecated. Use `trapezoid` instead, or one of the numerical integration functions in `scipy.integrate`.
+  return float(np.trapz(np.r_[0.0, tp / P, 1.0], np.r_[0.0, fp / N, 1.0]))
+NACIONAL     M1-GBT           1615  626  0.7248  0.8138  0.1084  0.4895  0.9329   584   609    42   380
+NACIONAL     Tasa historica   1615  626  0.6858  0.7907  0.1111  0.4912  0.9377   587   608    39   381
+NACIONAL     Regla ingenua    1615  626  0.5819  0.7267  1.0000  0.6076  0.7668   480   310   146   679
+LA LIBERTAD  M1-GBT             65   28  0.6270  0.7645  0.1084  0.5682  0.8929    25    19     3    18
+LA LIBERTAD  Tasa historica     65   28  0.7336  0.8161  0.1111  0.6500  0.9286    26    14     2    23
+LA LIBERTAD  Regla ingenua      65   28  0.6050  0.6863  1.0000  0.6429  0.6429    18    10    10    27
+
+==============================================================================
+ 5.4 ESCRITURA EN curated/gold/ (Parquet, 1 archivo por tabla)
+==============================================================================
+gold_riesgo_distrito_mes     9367 filas | ubigeo:string, departamento:string, distrito:string, anio:int, mes:int, prob_interrupcion:double, alerta:int, interrupcion_real:int
+dim_distrito                  323 filas | ubigeo:string, departamento:string, provincia:string, distrito:string, n_peligros:int, cobertura_clima:double
+dim_tiempo                     29 filas | anio:int, mes:int, trimestre:int, temporada_lluvia:int
+gold_kpi_mensual              754 filas | anio:int, mes:int, departamento:string, es_la_libertad:int, n_distritos:bigint, distritos_con_interrupcion:bigint, tasa_interrupcion:double, distritos_en_alerta:bigint, tp:bigint, fp:bigint, fn:bigint, precision_alertas:double, recall_alertas:double
+gold_comparacion_modelos        6 filas | conjunto:string, ambito:string, modelo:string, n:bigint, positivos:bigint, auc_pr:double, auc_roc:double, umbral:double, precision:double, recall:double, tp:bigint, fp:bigint, fn:bigint, tn:bigint
+
+==============================================================================
+ 5.5 RESUMEN
+==============================================================================
+Hechos: 9367 filas distrito-mes (2022-01..2024-05) | alertas=6203 | meses con interrupcion real=4004
+Datos personales: ninguno (panel agregado distrito-mes; sin IDs ni nombres de personas).
+[lanzador] tiempo del script gold.py: 183.10 s
+
+3. ARCHIVOS EN s3://<bucket>/curated/gold/
+   curated/gold/dim_distrito/_SUCCESS                                                        0 B
+   curated/gold/dim_distrito/part-00000-5f48e7b8-3f89-46ce-9c63-08f60c9e0e36-c000.snappy.parquet       8815 B
+   curated/gold/dim_tiempo/_SUCCESS                                                          0 B
+   curated/gold/dim_tiempo/part-00000-ea2e059a-c5db-4151-a3b0-5743f812d708-c000.snappy.parquet       1421 B
+   curated/gold/gold_comparacion_modelos/_SUCCESS                                            0 B
+   curated/gold/gold_comparacion_modelos/part-00000-3289e9c2-239c-4c7e-8d62-bd53a821d84e-c000.snappy.parquet       4417 B
+   curated/gold/gold_kpi_mensual/_SUCCESS                                                    0 B
+   curated/gold/gold_kpi_mensual/part-00000-43c5890a-e64b-4cf4-b563-b3fd054ec866-c000.snappy.parquet      12710 B
+   curated/gold/gold_riesgo_distrito_mes/_SUCCESS                                            0 B
+   curated/gold/gold_riesgo_distrito_mes/part-00000-557c1209-cba0-411d-be70-30ee1a10f9b0-c000.snappy.parquet      76501 B
+   total 101.4 KB
+
+4. KPIs DE LA CAPA GOLD (calculados sobre gold_riesgo_distrito_mes; alerta = prob >= 0.1084)
+periodo                          ambito       filas distr. tasa_real %alerta prob_med   TP   FP   FN precision recall
+2022-01..2024-05 (todo)          NACIONAL      9367   323    0.4275  0.6622   0.4022 3591 2612  413   0.5789  0.8969
+2022-01..2024-05 (todo)          LA LIBERTAD    377    13    0.2997  0.4536   0.2573   88   83   25   0.5146  0.7788
+holdout 2024-01..05              NACIONAL      1615   323    0.3876  0.7387   0.4647  584  609   42   0.4895  0.9329
+holdout 2024-01..05              LA LIBERTAD     65    13    0.4308  0.6769   0.3560   25   19    3   0.5682  0.8929
+2022-01..2024-04 (sin mayo 2024) NACIONAL      9044   323    0.4423  0.6602   0.4005 3587 2384  413   0.6007  0.8968
+2022-01..2024-04 (sin mayo 2024) LA LIBERTAD    364    13    0.3049  0.4451   0.2518   86   76   25   0.5309  0.7748
+   2024-05 esta incompleto en el origen (SUNASS termina el 2024-05-07): por eso se muestra tambien sin mayo.
+   Abril 2024 (mes por defecto del dashboard): NACIONAL 249 de 323 en alerta, tasa real 0.4520, precision 0.5382,
+   recall 0.9178 | LA LIBERTAD 8 de 13 en alerta, tasa real 0.5385, precision 0.7500, recall 0.8571.
+
+5. COSTO REAL DEL PASO 4
+   EMR gold (totalResourceUtilization)                         0.0323 USD (facturado 0.0318)
+   Athena: 3 consultas + 5 COUNT(*) + 1 re-ejecucion de Q1 para la captura = 9 x 10 MB minimo  <= 0.0004 USD
+   Athena DDL (CREATE DATABASE, 5 DROP + 5 CREATE TABLE)        0 USD
+   Glue Data Catalog (1 base + 5 tablas, dentro del millon gratuito)  0 USD
+   S3 (curated/gold 101 KB + resultados Athena + ubigeo 105 KB)  ~0 USD
+   TOTAL paso 4                                                ~0.033 USD (estimado previo 0.03, techo 0.11)

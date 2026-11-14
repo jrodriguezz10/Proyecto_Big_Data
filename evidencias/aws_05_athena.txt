@@ -1,0 +1,202 @@
+============================================================================================
+ AWS paso 4 - GLUE DATA CATALOG (DDL desde Athena, sin crawler) y CONSULTAS ATHENA (us-east-2)
+============================================================================================
+Workgroup primary (Athena engine v3) | resultados en s3://<bucket>/logs/athena/ | base Glue: sedalib_gold
+Costo Athena: 5.0 USD por TB escaneado, minimo 10 MB por consulta; DDL sin costo.
+
+1. DDL
+   CREATE DATABASE IF NOT EXISTS sedalib_gold -> OK (fac142e6-59f3-43ea-b2d6-4694d98dbf8d)
+
+CREATE EXTERNAL TABLE gold_riesgo_distrito_mes (
+  ubigeo string,
+  departamento string,
+  distrito string,
+  anio int,
+  mes int,
+  prob_interrupcion double,
+  alerta int,
+  interrupcion_real int
+)
+STORED AS PARQUET
+LOCATION 's3://<bucket>/curated/gold/gold_riesgo_distrito_mes/';
+   -> OK (17d4b283-fb50-4947-9754-8ffbb77dba16)
+
+CREATE EXTERNAL TABLE dim_distrito (
+  ubigeo string,
+  departamento string,
+  provincia string,
+  distrito string,
+  n_peligros int,
+  cobertura_clima double
+)
+STORED AS PARQUET
+LOCATION 's3://<bucket>/curated/gold/dim_distrito/';
+   -> OK (708a22bf-e733-4c27-8f8d-c0a3de0eabe8)
+
+CREATE EXTERNAL TABLE dim_tiempo (
+  anio int,
+  mes int,
+  trimestre int,
+  temporada_lluvia int
+)
+STORED AS PARQUET
+LOCATION 's3://<bucket>/curated/gold/dim_tiempo/';
+   -> OK (eb9c3526-3d77-494b-bd9e-acf9f18999bc)
+
+CREATE EXTERNAL TABLE gold_kpi_mensual (
+  anio int,
+  mes int,
+  departamento string,
+  es_la_libertad int,
+  n_distritos bigint,
+  distritos_con_interrupcion bigint,
+  tasa_interrupcion double,
+  distritos_en_alerta bigint,
+  tp bigint,
+  fp bigint,
+  fn bigint,
+  precision_alertas double,
+  recall_alertas double
+)
+STORED AS PARQUET
+LOCATION 's3://<bucket>/curated/gold/gold_kpi_mensual/';
+   -> OK (fdf28d0e-7ad8-4ea3-aafa-1bdf0d023b53)
+
+CREATE EXTERNAL TABLE gold_comparacion_modelos (
+  conjunto string,
+  ambito string,
+  modelo string,
+  n bigint,
+  positivos bigint,
+  auc_pr double,
+  auc_roc double,
+  umbral double,
+  precision double,
+  recall double,
+  tp bigint,
+  fp bigint,
+  fn bigint,
+  tn bigint
+)
+STORED AS PARQUET
+LOCATION 's3://<bucket>/curated/gold/gold_comparacion_modelos/';
+   -> OK (034d3ab2-ed1e-447f-952e-36df527e25a5)
+
+2. TABLAS REGISTRADAS EN GLUE (glue:GetTables)
+   dim_distrito               EXTERNAL_TABLE  6 columnas  s3://<bucket>/curated/gold/dim_distrito
+   dim_tiempo                 EXTERNAL_TABLE  4 columnas  s3://<bucket>/curated/gold/dim_tiempo
+   gold_comparacion_modelos   EXTERNAL_TABLE 14 columnas  s3://<bucket>/curated/gold/gold_comparacion_modelos
+   gold_kpi_mensual           EXTERNAL_TABLE 13 columnas  s3://<bucket>/curated/gold/gold_kpi_mensual
+   gold_riesgo_distrito_mes   EXTERNAL_TABLE  8 columnas  s3://<bucket>/curated/gold/gold_riesgo_distrito_mes
+
+3. FILAS POR TABLA (COUNT(*) en Athena)
+   gold_riesgo_distrito_mes      9367 filas | escaneado 0 B
+   dim_distrito                   323 filas | escaneado 0 B
+   dim_tiempo                      29 filas | escaneado 0 B
+   gold_kpi_mensual               754 filas | escaneado 0 B
+   gold_comparacion_modelos         6 filas | escaneado 0 B
+
+4. CONSULTAS
+
+-- Q1. Top 10 distritos de La Libertad por riesgo (holdout 2024-01..05)
+SELECT h.distrito, d.provincia, h.ubigeo,
+       ROUND(AVG(h.prob_interrupcion), 4) AS prob_media,
+       SUM(h.alerta) AS meses_en_alerta,
+       SUM(h.interrupcion_real) AS meses_con_interrupcion
+FROM gold_riesgo_distrito_mes h
+JOIN dim_distrito d ON d.departamento = h.departamento AND d.distrito = h.distrito
+WHERE h.departamento = 'LA LIBERTAD' AND h.anio = 2024
+GROUP BY h.distrito, d.provincia, h.ubigeo
+ORDER BY prob_media DESC
+LIMIT 10;
+   id 8563d93e-efff-4408-908f-d850e50929c5 | datos escaneados 82575 B (80.6 KB) | facturable 10 MB (minimo) | 0.00004768 USD | motor 749 ms | 10 filas
+               distrito  provincia  ubigeo  prob_media  meses_en_alerta  meses_con_interrupcion
+   --------------------  ---------  ------  ----------  ---------------  ----------------------
+               TRUJILLO   TRUJILLO  130101      0.9399                5                       4
+              SALAVERRY   TRUJILLO  130109      0.5139                5                       4
+                  MOCHE   TRUJILLO  130107      0.5132                5                       4
+   VICTOR LARCO HERRERA   TRUJILLO  130111      0.4924                5                       3
+            EL PORVENIR   TRUJILLO  130102      0.4431                5                       4
+                 CHEPEN     CHEPEN  130401      0.3794                5                       2
+      FLORENCIA DE MORA   TRUJILLO  130103      0.3495                3                       2
+           LA ESPERANZA   TRUJILLO  130105       0.336                4                       2
+              HUANCHACO   TRUJILLO  130104      0.3299                4                       3
+                 PAIJAN     ASCOPE  130205      0.0943                1                       0
+
+-- Q2. Alertas por mes frente a interrupciones reales (nacional y La Libertad)
+SELECT h.anio, h.mes, t.temporada_lluvia,
+       SUM(h.alerta) AS alertas,
+       SUM(h.interrupcion_real) AS interrupciones_reales,
+       SUM(CASE WHEN h.departamento = 'LA LIBERTAD' THEN h.alerta ELSE 0 END) AS alertas_ll,
+       SUM(CASE WHEN h.departamento = 'LA LIBERTAD' THEN h.interrupcion_real ELSE 0 END) AS reales_ll
+FROM gold_riesgo_distrito_mes h
+JOIN dim_tiempo t ON t.anio = h.anio AND t.mes = h.mes
+GROUP BY h.anio, h.mes, t.temporada_lluvia
+ORDER BY h.anio, h.mes;
+   id 9b881f26-acc8-40af-a1e6-f984a9fe797d | datos escaneados 3925 B (3.8 KB) | facturable 10 MB (minimo) | 0.00004768 USD | motor 769 ms | 29 filas
+   anio  mes  temporada_lluvia  alertas  interrupciones_reales  alertas_ll  reales_ll
+   ----  ---  ----------------  -------  ---------------------  ----------  ---------
+   2022    1                 1      180                    108           1          0
+   2022    2                 1      193                    131           0          0
+   2022    3                 1      194                    133           0          0
+   2022    4                 1      203                    140           0          0
+   2022    5                 0      213                    143           0          1
+   2022    6                 0      225                    133           1          0
+   2022    7                 0      195                    127           1          2
+   2022    8                 0      203                    135           3          1
+   2022    9                 0      207                    133           3          5
+   2022   10                 0      209                    151           6          8
+   2022   11                 0      203                    152           7          9
+   2022   12                 1      225                    135           7          5
+   2023    1                 1      216                    129          10          5
+   2023    2                 1      222                    133          10          5
+   2023    3                 1      207                    130           8          1
+   2023    4                 1      206                    134           6          3
+   2023    5                 0      208                    144           6          6
+   2023    6                 0      222                    138           6          3
+   2023    7                 0      195                    150           7          4
+   2023    8                 0      211                    136           7          4
+   2023    9                 0      201                    148           6          7
+   2023   10                 0      211                    175           8         11
+   2023   11                 0      229                    172          12          3
+   2023   12                 1      232                    168          12          2
+   2024    1                 1      239                    167          11          6
+   2024    2                 1      236                    159           7          8
+   2024    3                 1      237                    150           9          5
+   2024    4                 1      249                    146           8          7
+   2024    5                 0      232                      4           9          2
+
+-- Q3. Recall de las alertas en el holdout 2024 (TP / (TP + FN))
+SELECT ambito, SUM(tp) AS tp, SUM(fn) AS fn, SUM(fp) AS fp,
+       ROUND(CAST(SUM(tp) AS DOUBLE) / (SUM(tp) + SUM(fn)), 4) AS recall,
+       ROUND(CAST(SUM(tp) AS DOUBLE) / (SUM(tp) + SUM(fp)), 4) AS precision
+FROM (
+  SELECT CASE WHEN departamento = 'LA LIBERTAD' THEN 'LA LIBERTAD' ELSE 'RESTO' END AS ambito,
+         CASE WHEN alerta = 1 AND interrupcion_real = 1 THEN 1 ELSE 0 END AS tp,
+         CASE WHEN alerta = 0 AND interrupcion_real = 1 THEN 1 ELSE 0 END AS fn,
+         CASE WHEN alerta = 1 AND interrupcion_real = 0 THEN 1 ELSE 0 END AS fp
+  FROM gold_riesgo_distrito_mes WHERE anio = 2024
+  UNION ALL
+  SELECT 'NACIONAL',
+         CASE WHEN alerta = 1 AND interrupcion_real = 1 THEN 1 ELSE 0 END,
+         CASE WHEN alerta = 0 AND interrupcion_real = 1 THEN 1 ELSE 0 END,
+         CASE WHEN alerta = 1 AND interrupcion_real = 0 THEN 1 ELSE 0 END
+  FROM gold_riesgo_distrito_mes WHERE anio = 2024
+) x
+WHERE ambito IN ('NACIONAL', 'LA LIBERTAD')
+GROUP BY ambito
+ORDER BY ambito DESC;
+   id 2d60db01-93ae-43fc-ab38-8d6888a7b047 | datos escaneados 5891 B (5.8 KB) | facturable 10 MB (minimo) | 0.00004768 USD | motor 516 ms | 2 filas
+        ambito   tp  fn   fp  recall  precision
+   -----------  ---  --  ---  ------  ---------
+      NACIONAL  584  42  609  0.9329     0.4895
+   LA LIBERTAD   25   3   19  0.8929     0.5682
+
+5. COSTO ATHENA: 3 consultas = 0.00014305 USD | 5 COUNT(*) de control (0 B escaneados; se cuenta el minimo de 10 MB como cota) = 0.00023842 USD | DDL = 0 | total 0.00038147 USD
+
+6. NOTA DE DATOS: 2024-05 tiene solo 4 distrito-mes con interrupcion real (vs ~150 en meses previos):
+   el registro SUNASS de origen termina el 2024-05-07 (4 interrupciones en mayo), por eso precision/tasa de ese mes no son
+   comparables. Q3 (recall holdout) no se ve afectada en el recall; la precision del holdout si incluye mayo.
+
+7. CAPTURA (capturas/aws/cap_aws05_athena.png): Q1 re-ejecutada con aws/ver_aws05.py athena,
+   id b4fd4016-10b8-4c8a-9aad-7e4a39f8a3cf | 80.6 KB escaneados | mismo resultado que la seccion 4.

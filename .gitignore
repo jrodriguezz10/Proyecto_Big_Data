@@ -5,6 +5,7 @@ processed/
 *.parquet
 *.csv
 !evidencias/*.csv
+!dashboard/data/*.csv
 *.xlsx
 
 # Python / entorno
