@@ -30,7 +30,6 @@ CONSOLA = "https://s3.console.aws.amazon.com/s3/buckets/%s?region=%s" % (BUCKET,
 TITULO = "CAP_AWS01"
 ROL_EMR, APP_EMR, PRESUPUESTO = "sedalib-emr-execution-role", "sedalib-spark", "sedalib-10usd"
 IAM_ROL = "https://us-east-1.console.aws.amazon.com/iam/home#/roles/details/%s?section=permissions" % ROL_EMR
-EMR_APPS = "https://%s.console.aws.amazon.com/emr/home?region=%s#/serverless" % (REGION, REGION)
 BUDGETS = "https://us-east-1.console.aws.amazon.com/billing/home#/budgets"
 
 user32 = ctypes.windll.user32
@@ -146,7 +145,17 @@ def main():
     elif op == "rol":
         navegador(IAM_ROL, "cap_aws02_rol.png", contiene=(ROL_EMR, "IAM"), pintar=6)
     elif op == "emr":
-        navegador(EMR_APPS, "cap_aws02_emr_app.png", contiene=(APP_EMR, "EMR"), pintar=8)
+        # La consola solo lista aplicaciones dentro de EMR Studio (crearia un recurso): se usa la CLI.
+        import boto3
+        apps = boto3.client("emr-serverless", region_name=REGION).list_applications()["applications"]
+        ids = [a["id"] for a in apps if a["name"] == APP_EMR and a["state"] != "TERMINATED"]
+        if not ids:
+            sys.exit("No existe la aplicacion %s" % APP_EMR)
+        app_id = ids[0]
+        terminal('title %s && aws emr-serverless get-application --region %s --application-id %s --output table '
+                 '--query "application.{Nombre:name,Estado:state,Release:releaseLabel,CPU_max:maximumCapacity.cpu,'
+                 'Memoria_max:maximumCapacity.memory,Autoapagado_min:autoStopConfiguration.idleTimeoutMinutes,'
+                 'Etiquetas:tags}"' % (TITULO, REGION, app_id), "cap_aws02_emr_app.png")
     elif op == "budget":
         navegador(BUDGETS, "cap_aws02_budget.png", contiene=(PRESUPUESTO, "Budget", "Presupuesto", "Billing", "Facturaci"),
                   pintar=8)
