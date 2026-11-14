@@ -1,0 +1,20 @@
+Tarifa EMR Serverless us-east-2 (US East, Ohio), arquitectura x86_64 - API AWS Pricing
+Fecha de consulta: 2026-11-13 20:03 -0500
+Comando: aws pricing get-products --region us-east-1 --service-code ElasticMapReduce --filters Type=TERM_MATCH,Field=usagetype,Value=<usagetype>
+
+usagetype                            | USD          | descripcion
+USE2-EMR-SERVERLESS-vCPUHours        | 0.0526240000 | $0.052624 per vCPU per hour in US East (Ohio)
+USE2-EMR-SERVERLESS-MemoryGBHours    | 0.0057785000 | $0.0057785 per GB per hour in US East (Ohio)
+USE2-EMR-SERVERLESS-StorageGBHours   | 0.0001110000 | $0.000111 per storage GB per hour in US East (Ohio)
+
+Formula del estimado (techo, aws/03_pipeline_emr.py):
+  costo_hora_techo = workers x (vCPU_por_worker x P_vCPU + GB_por_worker x P_GB)
+                   = 4 x (2 x 0.052624 + 8 x 0.0057785) = 0.606 USD/hora
+  (4 workers = driver + 3 executors, cada uno 2 vCPU / 8 GB; disco: 20 GB por worker sin costo)
+  estimado_job = costo_hora_techo x minutos_estimados / 60
+  minutos estimados: procesamiento 6, calidad 3, integracion clima 3, modelo 25 -> 37 min -> <= 0.37 USD
+
+Formula del costo real (por job, con get-job-run):
+  costo = vCPUHour x 0.052624 + memoryGBHour x 0.0057785 + storageGBHour x 0.000111
+  usando totalResourceUtilization (uso real) y, como referencia, billedResourceUtilization (facturado:
+  minimo 1 minuto por worker, 20 GB de disco por worker sin costo).

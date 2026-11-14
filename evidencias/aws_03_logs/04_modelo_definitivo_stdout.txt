@@ -1,0 +1,161 @@
+
+==============================================================================
+ 4.0 DATOS Y DISENO
+==============================================================================
+Filas modelables (con INT_LAG1): 19057 | distritos: 323 | prevalencia: 0.3428 | 2019-07 a 2024-05
+Variables M1: ['INT_LAG1', 'TARGET_LAG1', 'INT_PREV3', 'N_PELIGROS', 'PCT_SIST_MAS_20_ANIOS', 'PCT_SIST_NO_OPERA', 'INFRA_DISPONIBLE'] + categoricas ['MES_STR', 'DEPTO_N', 'TIPO_PELIGRO']
+Variables M2: M1 + ['PP_ANOMALIA_LAG1', 'MES_LLUVIOSO_LAG1', 'CLIMA_DISPONIBLE']
+Excluidas por fuga: N_INTERRUPCIONES, N_IMPREVISTAS, TARGET y clima del mismo mes.
+
+corte        entrenamiento          validacion              n_train    n_val    prev_tr   prev_val
+2022-S1      2019-07..2021-12       2022-01..2022-06           9690     1938     0.2609     0.4066
+2022-S2      2019-07..2022-06       2022-07..2022-12          11628     1938     0.2852     0.4298
+2023-S1      2019-07..2022-12       2023-01..2023-06          13566     1938     0.3058     0.4169
+2023-S2      2019-07..2023-06       2023-07..2023-12          15504     1938     0.3197     0.4897
+2024-01..05  2019-07..2023-12       2024-01..2024-05          17442     1615     0.3386     0.3876
+
+==============================================================================
+ 4.1 VALIDACION ROLLING-ORIGIN (4 cortes semestrales) - AUC-PR / AUC-ROC nacional
+==============================================================================
+
+Corte 2022-S1 (n=1938, positivos=788; La Libertad n=78, positivos=1)
+/tmp/spark-4708fcbb-3a88-41f1-a21a-263316b40edc/modelo_definitivo.py:108: DeprecationWarning: `trapz` is deprecated. Use `trapezoid` instead, or one of the numerical integration functions in `scipy.integrate`.
+  return float(np.trapz(np.r_[prec[0], prec], np.r_[0.0, rec]))
+/tmp/spark-4708fcbb-3a88-41f1-a21a-263316b40edc/modelo_definitivo.py:116: DeprecationWarning: `trapz` is deprecated. Use `trapezoid` instead, or one of the numerical integration functions in `scipy.integrate`.
+  return float(np.trapz(np.r_[0.0, tp / P, 1.0], np.r_[0.0, fp / N, 1.0]))
+   M1  Regla ingenua        AUC-PR=0.6542  AUC-ROC=0.7412 | La Libertad AUC-PR=0.0064
+   M1  LogisticRegression   AUC-PR=0.8133  AUC-ROC=0.8172 | La Libertad AUC-PR=0.0556
+   M1  DecisionTree         AUC-PR=0.8053  AUC-ROC=0.8346 | La Libertad AUC-PR=0.0064
+   M1  RandomForest         AUC-PR=0.8229  AUC-ROC=0.8337 | La Libertad AUC-PR=0.0417
+   M1  GBT                  AUC-PR=0.8309  AUC-ROC=0.8422 | La Libertad AUC-PR=0.0312
+   M2  Regla ingenua        AUC-PR=0.6542  AUC-ROC=0.7412 | La Libertad AUC-PR=0.0064
+   M2  LogisticRegression   AUC-PR=0.8133  AUC-ROC=0.8174 | La Libertad AUC-PR=0.0556
+   M2  DecisionTree         AUC-PR=0.8053  AUC-ROC=0.8346 | La Libertad AUC-PR=0.0064
+   M2  RandomForest         AUC-PR=0.8202  AUC-ROC=0.8277 | La Libertad AUC-PR=0.0294
+   M2  GBT                  AUC-PR=0.8289  AUC-ROC=0.8401 | La Libertad AUC-PR=0.0556
+   Control M1-GBT: AUC-PR numpy=0.830950 Spark=0.830950 | AUC-ROC numpy=0.842188 Spark=0.842188
+
+Corte 2022-S2 (n=1938, positivos=833; La Libertad n=78, positivos=30)
+   M1  Regla ingenua        AUC-PR=0.6884  AUC-ROC=0.7619 | La Libertad AUC-PR=0.6529
+   M1  LogisticRegression   AUC-PR=0.8360  AUC-ROC=0.8296 | La Libertad AUC-PR=0.6593
+   M1  DecisionTree         AUC-PR=0.8206  AUC-ROC=0.8364 | La Libertad AUC-PR=0.6471
+   M1  RandomForest         AUC-PR=0.8425  AUC-ROC=0.8444 | La Libertad AUC-PR=0.6412
+   M1  GBT                  AUC-PR=0.8376  AUC-ROC=0.8383 | La Libertad AUC-PR=0.6703
+   M2  Regla ingenua        AUC-PR=0.6884  AUC-ROC=0.7619 | La Libertad AUC-PR=0.6529
+   M2  LogisticRegression   AUC-PR=0.8361  AUC-ROC=0.8298 | La Libertad AUC-PR=0.6595
+   M2  DecisionTree         AUC-PR=0.8206  AUC-ROC=0.8364 | La Libertad AUC-PR=0.6471
+   M2  RandomForest         AUC-PR=0.8397  AUC-ROC=0.8441 | La Libertad AUC-PR=0.6758
+   M2  GBT                  AUC-PR=0.8383  AUC-ROC=0.8395 | La Libertad AUC-PR=0.6594
+
+Corte 2023-S1 (n=1938, positivos=808; La Libertad n=78, positivos=23)
+   M1  Regla ingenua        AUC-PR=0.6814  AUC-ROC=0.7625 | La Libertad AUC-PR=0.5081
+   M1  LogisticRegression   AUC-PR=0.8338  AUC-ROC=0.8386 | La Libertad AUC-PR=0.6402
+   M1  DecisionTree         AUC-PR=0.8075  AUC-ROC=0.8408 | La Libertad AUC-PR=0.5637
+   M1  RandomForest         AUC-PR=0.8387  AUC-ROC=0.8508 | La Libertad AUC-PR=0.6081
+   M1  GBT                  AUC-PR=0.8417  AUC-ROC=0.8519 | La Libertad AUC-PR=0.6505
+   M2  Regla ingenua        AUC-PR=0.6814  AUC-ROC=0.7625 | La Libertad AUC-PR=0.5081
+   M2  LogisticRegression   AUC-PR=0.8338  AUC-ROC=0.8384 | La Libertad AUC-PR=0.6298
+   M2  DecisionTree         AUC-PR=0.8075  AUC-ROC=0.8408 | La Libertad AUC-PR=0.5637
+   M2  RandomForest         AUC-PR=0.8361  AUC-ROC=0.8475 | La Libertad AUC-PR=0.6043
+   M2  GBT                  AUC-PR=0.8393  AUC-ROC=0.8496 | La Libertad AUC-PR=0.6569
+
+Corte 2023-S2 (n=1938, positivos=949; La Libertad n=78, positivos=31)
+   M1  Regla ingenua        AUC-PR=0.7469  AUC-ROC=0.7777 | La Libertad AUC-PR=0.5010
+   M1  LogisticRegression   AUC-PR=0.8765  AUC-ROC=0.8549 | La Libertad AUC-PR=0.5438
+   M1  DecisionTree         AUC-PR=0.8811  AUC-ROC=0.8634 | La Libertad AUC-PR=0.5333
+   M1  RandomForest         AUC-PR=0.8860  AUC-ROC=0.8712 | La Libertad AUC-PR=0.6567
+   M1  GBT                  AUC-PR=0.8883  AUC-ROC=0.8707 | La Libertad AUC-PR=0.6572
+   M2  Regla ingenua        AUC-PR=0.7469  AUC-ROC=0.7777 | La Libertad AUC-PR=0.5010
+   M2  LogisticRegression   AUC-PR=0.8765  AUC-ROC=0.8551 | La Libertad AUC-PR=0.5433
+   M2  DecisionTree         AUC-PR=0.8811  AUC-ROC=0.8634 | La Libertad AUC-PR=0.5333
+   M2  RandomForest         AUC-PR=0.8836  AUC-ROC=0.8695 | La Libertad AUC-PR=0.6624
+   M2  GBT                  AUC-PR=0.8878  AUC-ROC=0.8706 | La Libertad AUC-PR=0.6632
+
+==============================================================================
+ 4.2 RESUMEN CV: AUC-PR media y desviacion (ddof=1) de los 4 cortes
+==============================================================================
+var modelo                    media       desv          min          max     media_LL
+M1  GBT                      0.8497     0.0262       0.8309       0.8883       0.5023
+M2  GBT                      0.8486     0.0266       0.8289       0.8878       0.5088
+M1  RandomForest             0.8475     0.0270       0.8229       0.8860       0.4869
+M2  RandomForest             0.8449     0.0272       0.8202       0.8836       0.4930
+M2  LogisticRegression       0.8399     0.0265       0.8133       0.8765       0.4720
+M1  LogisticRegression       0.8399     0.0265       0.8133       0.8765       0.4747
+M1  DecisionTree             0.8286     0.0356       0.8053       0.8811       0.4376
+M2  DecisionTree             0.8286     0.0356       0.8053       0.8811       0.4376
+M1  Regla ingenua            0.6927     0.0390       0.6542       0.7469       0.4171
+M2  Regla ingenua            0.6927     0.0390       0.6542       0.7469       0.4171
+
+SELECCIONADO (mayor AUC-PR media en CV, sin mirar el holdout): M1 - GBT
+   Mejor de M1: GBT (0.8497 +/- 0.0262)
+   Mejor de M2: GBT (0.8486 +/- 0.0266)
+   M2 - M1 Regla ingenua        por corte: +0.0000 +0.0000 +0.0000 +0.0000 | media +0.0000
+   M2 - M1 LogisticRegression   por corte: +0.0000 +0.0001 -0.0001 +0.0000 | media +0.0000
+   M2 - M1 DecisionTree         por corte: +0.0000 +0.0000 +0.0000 +0.0000 | media +0.0000
+   M2 - M1 RandomForest         por corte: -0.0027 -0.0028 -0.0026 -0.0023 | media -0.0026
+   M2 - M1 GBT                  por corte: -0.0020 +0.0007 -0.0024 -0.0005 | media -0.0011
+
+==============================================================================
+ 4.3 UMBRAL elegido en validacion agrupada (recall max con precision >= 0.60)
+==============================================================================
+var modelo                   umbral  precision     recall   factible
+M1  Regla ingenua            1.0000     0.7362     0.7238         si
+M1  LogisticRegression       0.1313     0.6007     0.8470         si
+M1  DecisionTree             0.2000     0.6273     0.8769         si
+M1  RandomForest             0.1264     0.6002     0.8908         si
+M1  GBT                      0.1084     0.6002     0.8905         si
+M2  Regla ingenua            1.0000     0.7362     0.7238         si
+M2  LogisticRegression       0.1319     0.6007     0.8470         si
+M2  DecisionTree             0.2000     0.6273     0.8769         si
+M2  RandomForest             0.1336     0.6015     0.8822         si
+M2  GBT                      0.1131     0.6017     0.8887         si
+
+==============================================================================
+ 4.4 HOLDOUT 2024-01..2024-05 (entrena con todo < 2024-01; umbral fijo de 4.3)
+==============================================================================
+
+--- Ambito: NACIONAL | n=1615 distrito-meses | distritos=323 | positivos=626 (prevalencia 0.3876)
+var modelo                 AUC-PR  AUC-ROC   umbral     prec   recall |    TN    FP    FN    TP | dAUC-PR vs ingenua [IC95]      dRecall vs ingenua [IC95]      dPrecision vs ingenua [IC95]  
+M1  Regla ingenua          0.5819   0.7267   1.0000   0.6076   0.7668 |   679   310   146   480 | -                              -                              -                             
+M1  LogisticRegression     0.7164   0.7974   0.1313   0.4691   0.8978 |   353   636    64   562 | +0.1345 [+0.1163, +0.1541]     +0.1310 [+0.1008, +0.1630]     -0.1385 [-0.1630, -0.1128]    
+M1  DecisionTree           0.7135   0.8111   0.2000   0.5102   0.9185 |   437   552    51   575 | +0.1316 [+0.1104, +0.1538]     +0.1518 [+0.1191, +0.1869]     -0.0974 [-0.1155, -0.0804]    
+M1  RandomForest           0.7310   0.8157   0.1264   0.4427   0.9744 |   221   768    16   610 | +0.1490 [+0.1308, +0.1685]     +0.2077 [+0.1715, +0.2478]     -0.1649 [-0.1902, -0.1385]    
+M1  GBT                    0.7248   0.8138   0.1084   0.4895   0.9329 |   380   609    42   584 | +0.1429 [+0.1218, +0.1664]     +0.1661 [+0.1337, +0.2021]     -0.1181 [-0.1377, -0.0974]     <== seleccionado
+M2  Regla ingenua          0.5819   0.7267   1.0000   0.6076   0.7668 |   679   310   146   480 | -                              -                              -                             
+M2  LogisticRegression     0.7168   0.7980   0.1319   0.4703   0.8994 |   355   634    63   563 | +0.1349 [+0.1168, +0.1543]     +0.1326 [+0.1024, +0.1634]     -0.1373 [-0.1607, -0.1118]    
+M2  DecisionTree           0.7139   0.8115   0.2000   0.5102   0.9185 |   437   552    51   575 | +0.1319 [+0.1107, +0.1542]     +0.1518 [+0.1191, +0.1869]     -0.0974 [-0.1155, -0.0804]    
+M2  RandomForest           0.7324   0.8170   0.1336   0.4703   0.9489 |   320   669    32   594 | +0.1505 [+0.1321, +0.1692]     +0.1821 [+0.1488, +0.2196]     -0.1373 [-0.1598, -0.1123]    
+M2  GBT                    0.7340   0.8135   0.1131   0.4962   0.9265 |   400   589    46   580 | +0.1521 [+0.1316, +0.1731]     +0.1597 [+0.1283, +0.1943]     -0.1114 [-0.1312, -0.0913]    
+
+--- Ambito: LA_LIBERTAD | n=65 distrito-meses | distritos=13 | positivos=28 (prevalencia 0.4308)
+var modelo                 AUC-PR  AUC-ROC   umbral     prec   recall |    TN    FP    FN    TP | dAUC-PR vs ingenua [IC95]      dRecall vs ingenua [IC95]      dPrecision vs ingenua [IC95]  
+M1  Regla ingenua          0.6050   0.6863   1.0000   0.6429   0.6429 |    27    10    10    18 | -                              -                              -                             
+M1  LogisticRegression     0.6528   0.7905   0.1313   0.6061   0.7143 |    24    13     8    20 | +0.0478 [-0.0507, +0.1615]     +0.0714 [+0.0000, +0.2308]     -0.0368 [-0.1471, +0.0580]    
+M1  DecisionTree           0.6858   0.7582   0.2000   0.5682   0.8929 |    18    19     3    25 | +0.0808 [-0.0554, +0.1862]     +0.2500 [+0.1199, +0.3847]     -0.0747 [-0.1842, +0.0229]    
+M1  RandomForest           0.6650   0.7790   0.1264   0.5833   1.0000 |    17    20     0    28 | +0.0600 [-0.0534, +0.1783]     +0.3571 [+0.2188, +0.5200]     -0.0595 [-0.1528, +0.0385]    
+M1  GBT                    0.6270   0.7645   0.1084   0.5682   0.8929 |    18    19     3    25 | +0.0220 [-0.0991, +0.1264]     +0.2500 [+0.1199, +0.3847]     -0.0747 [-0.1842, +0.0229]     <== seleccionado
+M2  Regla ingenua          0.6050   0.6863   1.0000   0.6429   0.6429 |    27    10    10    18 | -                              -                              -                             
+M2  LogisticRegression     0.6524   0.7886   0.1319   0.6176   0.7500 |    24    13     7    21 | +0.0474 [-0.0453, +0.1586]     +0.1071 [+0.0000, +0.2609]     -0.0252 [-0.1390, +0.0697]    
+M2  DecisionTree           0.6858   0.7582   0.2000   0.5682   0.8929 |    18    19     3    25 | +0.0808 [-0.0554, +0.1862]     +0.2500 [+0.1199, +0.3847]     -0.0747 [-0.1842, +0.0229]    
+M2  RandomForest           0.6980   0.7809   0.1336   0.5833   1.0000 |    17    20     0    28 | +0.0930 [-0.0494, +0.1753]     +0.3571 [+0.2188, +0.5200]     -0.0595 [-0.1528, +0.0385]    
+M2  GBT                    0.6421   0.7756   0.1131   0.5682   0.8929 |    18    19     3    25 | +0.0371 [-0.0852, +0.1492]     +0.2500 [+0.1199, +0.3847]     -0.0747 [-0.1842, +0.0229]    
+
+La Libertad - holdout por distrito (modelo seleccionado M1-GBT, umbral 0.1084):
+distrito                  meses   reales   pred=1  p_media
+CHEPEN                        5        2        5   0.3794
+CHOCOPE                       5        0        1   0.0881
+EL PORVENIR                   5        4        5   0.4431
+FLORENCIA DE MORA             5        2        3   0.3495
+HUANCHACO                     5        3        4   0.3299
+LA ESPERANZA                  5        2        4   0.3360
+MOCHE                         5        4        5   0.5132
+PAIJAN                        5        0        1   0.0943
+RAZURI                        5        0        1   0.0840
+SALAVERRY                     5        4        5   0.5139
+SIMBAL                        5        0        0   0.0646
+TRUJILLO                      5        4        5   0.9399
+VICTOR LARCO HERRERA          5        3        5   0.4924
+
+Escrito: evidencias/metricas_modelos.csv (150 filas), evidencias/modelo_definitivo_pred_holdout.csv (1615 filas)
+[lanzador] copiado metricas_modelos.csv -> s3://bigdata-lalibertad-jheyson-856152566912/curated/evidencias/04_modelo_definitivo/metricas_modelos.csv
+[lanzador] copiado modelo_definitivo_pred_holdout.csv -> s3://bigdata-lalibertad-jheyson-856152566912/curated/evidencias/04_modelo_definitivo/modelo_definitivo_pred_holdout.csv

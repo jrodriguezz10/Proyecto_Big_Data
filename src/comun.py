@@ -1,18 +1,30 @@
 """Utilidades compartidas por los scripts Spark del datalake SEDALIB.
 
-- Rutas HDFS (raw / processed)
+- Rutas del data lake (raw / processed), parametrizadas por entorno
 - Esquemas explicitos de TODAS las fuentes (no se usa inferSchema)
 - Normalizacion de nombres geograficos (trim, upper, sin tildes, '_' -> ' ')
 - Lectores de cada fuente
+
+Variables de entorno (sin definir = comportamiento local de siempre, HDFS en Docker):
+  SEDALIB_DATALAKE      raiz del data lake. Local: hdfs://namenode:8020/datalake_sedalib/
+                        AWS:   s3://bigdata-lalibertad-jheyson-856152566912/
+  SEDALIB_SPARK_MASTER  master de Spark. Local: local[*]. "auto" = no fijarlo en el codigo
+                        (lo decide spark-submit / EMR Serverless).
 """
+import os
+from urllib.parse import urlparse
+
 from pyspark.sql import SparkSession, functions as F
 from pyspark.sql.types import (StructType, StructField, StringType, DoubleType,
                                IntegerType)
 
-HDFS = "hdfs://namenode:8020"
-RAW = HDFS + "/datalake_sedalib/raw/"
-PROCESSED = HDFS + "/datalake_sedalib/processed/"
+DATALAKE = os.environ.get("SEDALIB_DATALAKE", "hdfs://namenode:8020/datalake_sedalib/").rstrip("/") + "/"
+_u = urlparse(DATALAKE)
+HDFS = "%s://%s" % (_u.scheme, _u.netloc)          # raiz del sistema de archivos (hdfs://... o s3://bucket)
+RAW = DATALAKE + "raw/"
+PROCESSED = DATALAKE + "processed/"
 PANEL = PROCESSED + "master_panel.parquet"
+SPARK_MASTER = os.environ.get("SEDALIB_SPARK_MASTER", "local[*]")
 
 
 def S(nombre):
@@ -61,8 +73,10 @@ ESQ_INFRA = StructType([
 
 
 def spark_session(nombre, **conf):
-    b = (SparkSession.builder.appName(nombre).master("local[*]")
-         .config("spark.sql.legacy.timeParserPolicy", "CORRECTED")
+    b = SparkSession.builder.appName(nombre)
+    if SPARK_MASTER != "auto":
+        b = b.master(SPARK_MASTER)
+    b = (b.config("spark.sql.legacy.timeParserPolicy", "CORRECTED")
          .config("spark.sql.session.timeZone", "UTC"))
     for k, v in conf.items():
         b = b.config(k, v)

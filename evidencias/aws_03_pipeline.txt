@@ -1,0 +1,103 @@
+
+==============================================================================
+ a. CONTEXTO - modo APLICAR
+==============================================================================
+Cuenta 856152566912 | arn:aws:iam::856152566912:user/proyecto-bigdata
+Aplicacion sedalib-spark (00ga9klqb8i0lq0d) | emr-7.9.0 | estado CREATED | max 8 vCPU / 32 GB
+Rol: arn:aws:iam::856152566912:role/sedalib-emr-execution-role | datos: s3://bigdata-lalibertad-jheyson-856152566912/raw/ -> processed/, curated/ | logs: s3://bigdata-lalibertad-jheyson-856152566912/logs/
+Recursos por job: driver 2 vCPU/8 GB + hasta 3 executors 2 vCPU/8 GB (spark.*.memory=7g + overhead)
+Precios us-east-2: 0.052624 USD/vCPU-h, 0.0057785 USD/GB-h, 0.000111 USD/GB-h disco (>20 GB/worker)
+
+==============================================================================
+ b. JOBS (en orden; se detiene si uno falla)
+==============================================================================
+01_procesamiento       procesamiento_spark.py   ~ 6 min  techo 0.061 USD (4 workers todo el tiempo)
+02_calidad             calidad_spark.py         ~ 3 min  techo 0.030 USD (4 workers todo el tiempo)
+03_integracion_clima   integracion_clima.py     ~ 3 min  techo 0.030 USD (4 workers todo el tiempo)
+04_modelo_definitivo   modelo_definitivo.py     ~25 min  techo 0.252 USD (4 workers todo el tiempo)
+Techo estimado: 0.606 USD por hora con 4 workers | pipeline ~37 min -> <= 0.37 USD
+
+==============================================================================
+ c. SUBIDA DE SCRIPTS a s3://bigdata-lalibertad-jheyson-856152566912/scripts/
+==============================================================================
+subido scripts/comun.py
+subido scripts/emr_lanzador.py
+subido scripts/procesamiento_spark.py
+subido scripts/calidad_spark.py
+subido scripts/integracion_clima.py
+subido scripts/modelo_definitivo.py
+
+==============================================================================
+ d. EJECUCION
+==============================================================================
+01_procesamiento lanzado: 00ga9ltcbslac80f
+01_procesamiento SUCCESS en 147s | vCPU-h 0.3040 | GB-h 1.2180 | costo 0.0234 USD
+02_calidad lanzado: 00ga9m033gmrd00f
+02_calidad SUCCESS en 88s | vCPU-h 0.1740 | GB-h 0.6980 | costo 0.0134 USD
+03_integracion_clima lanzado: 00ga9m1koaghd00f
+03_integracion_clima SUCCESS en 111s | vCPU-h 0.2220 | GB-h 0.8890 | costo 0.0171 USD
+04_modelo_definitivo lanzado: 00ga9m3cesdqe80f
+04_modelo_definitivo SUCCESS en 364s | vCPU-h 0.7870 | GB-h 3.1470 | costo 0.0605 USD
+
+==============================================================================
+ e. RESUMEN POR JOB (get-job-run: totalResourceUtilization = uso real)
+==============================================================================
+costo real = vCPU-h x 0.052624 + GB-h x 0.0057785 + disco GB-h x 0.000111 | facturado = mismo calculo con billedResourceUtilization | estimado = techo del plan
+job                    id                   estado    dur(s)   vCPU-h     GB-h discoGB-h  real USD  fact USD estim USD
+01_procesamiento       00ga9ltcbslac80f     SUCCESS      147   0.3040   1.2180   3.0440    0.0234    0.0230    0.0606
+02_calidad             00ga9m033gmrd00f     SUCCESS       88   0.1740   0.6980   1.7440    0.0134    0.0132    0.0303
+03_integracion_clima   00ga9m1koaghd00f     SUCCESS      111   0.2220   0.8890   2.2220    0.0171    0.0168    0.0303
+04_modelo_definitivo   00ga9m3cesdqe80f     SUCCESS      364   0.7870   3.1470   7.8670    0.0605    0.0596    0.2525
+TOTAL                                                   710   1.4870   5.9520  14.8770    0.1143    0.1126    0.3736
+
+==============================================================================
+ f. SILVER (processed/master_panel.parquet)
+==============================================================================
+Filas silver en S3: 19380 | esperado 19380 | OK
+Filas master_panel_clima en S3: 19380
+
+==============================================================================
+ g. METRICAS DEL MODELO: AWS (EMR Serverless) vs local (Docker, 04_modelo_definitivo.txt)
+==============================================================================
+Seleccionado en AWS: M1 - GBT
+ambito       var modelo               AUC-PR loc AUC-PR aws       dif |   rec loc   rec aws
+LA_LIBERTAD  M1  DecisionTree            0.6858    0.6858   +0.0000 |    0.8929    0.8929
+LA_LIBERTAD  M1  GBT                     0.6387    0.6270   -0.0117 |    0.8929    0.8929
+LA_LIBERTAD  M1  LogisticRegression      0.6528    0.6528   +0.0000 |    0.7143    0.7143
+LA_LIBERTAD  M1  RandomForest            0.6886    0.6650   -0.0236 |    0.8929    1.0000
+LA_LIBERTAD  M1  Regla ingenua           0.6050    0.6050   +0.0000 |    0.6429    0.6429
+LA_LIBERTAD  M2  DecisionTree            0.6858    0.6858   +0.0000 |    0.8929    0.8929
+LA_LIBERTAD  M2  GBT                     0.6337    0.6421   +0.0084 |    0.8929    0.8929
+LA_LIBERTAD  M2  LogisticRegression      0.6524    0.6524   +0.0000 |    0.7500    0.7500
+LA_LIBERTAD  M2  RandomForest            0.6325    0.6980   +0.0655 |    1.0000    1.0000
+LA_LIBERTAD  M2  Regla ingenua           0.6050    0.6050   +0.0000 |    0.6429    0.6429
+NACIONAL     M1  DecisionTree            0.7135    0.7135   +0.0000 |    0.9185    0.9185
+NACIONAL     M1  GBT                     0.7293    0.7248   -0.0045 |    0.9345    0.9329
+NACIONAL     M1  LogisticRegression      0.7164    0.7164   +0.0000 |    0.8978    0.8978
+NACIONAL     M1  RandomForest            0.7369    0.7310   -0.0059 |    0.9553    0.9744
+NACIONAL     M1  Regla ingenua           0.5819    0.5819   +0.0000 |    0.7668    0.7668
+NACIONAL     M2  DecisionTree            0.7135    0.7139   +0.0004 |    0.9185    0.9185
+NACIONAL     M2  GBT                     0.7272    0.7340   +0.0068 |    0.9281    0.9265
+NACIONAL     M2  LogisticRegression      0.7168    0.7168   +0.0000 |    0.8994    0.8994
+NACIONAL     M2  RandomForest            0.7193    0.7324   +0.0131 |    0.9473    0.9489
+NACIONAL     M2  Regla ingenua           0.5819    0.5819   +0.0000 |    0.7668    0.7668
+
+M1-GBT nacional AUC-PR: local 0.7293 | AWS 0.7248
+
+==============================================================================
+ h. POR QUE DIFIEREN ALGUNAS METRICAS (local Spark 3.2.1 / Docker vs AWS Spark 3.5.5-amzn-0 / EMR 7.9.0)
+==============================================================================
+Los datos son los mismos: silver 19380 filas en ambos, 19057 filas modelables, prevalencia 0.3428.
+* Identicos (dif 0.0000) en los dos ambitos: Regla ingenua, LogisticRegression y DecisionTree M1.
+  Son deterministas dado el mismo conjunto de datos, asi que el pipeline sustituido produce lo mismo.
+* Difieren RandomForest y GBT (y DecisionTree M2 en +0.0004): estos modelos discretizan las variables
+  continuas con cuantiles calculados sobre una MUESTRA de las filas cuando el entrenamiento supera
+  ~10 000 filas, y RandomForest ademas hace bootstrap por particion. La semilla (42) es la misma, pero
+  la muestra depende de como esten particionados los datos (3 executors x 2 nucleos en EMR vs local[*]
+  en Docker; parquet escrito por otro numero de tareas) y de la version de Spark (3.2.1 vs 3.5.5).
+* Magnitud: M1-GBT nacional 0.7293 -> 0.7248 (-0.0045); en validacion (control del corte 2022-S1)
+  0.830995 -> 0.830950. La seleccion no cambia: M1-GBT sigue siendo el de mayor AUC-PR media en CV.
+  En La Libertad (65 filas, 13 distritos) las diferencias son mayores (hasta +0.0655 en M2-RF) porque
+  pocas filas mueven mucho la curva PR. Verificado: las 16 diferencias dAUC-PR (modelo - regla ingenua)
+  obtenidas en AWS caen dentro de los IC 95 % bootstrap del holdout local (evidencias/metricas_modelos.csv),
+  en ambos ambitos; ninguna conclusion cambia.

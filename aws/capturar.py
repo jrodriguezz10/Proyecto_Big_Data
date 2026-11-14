@@ -9,6 +9,9 @@ Uso (desde la raiz del proyecto):
     python aws/capturar.py rol         -> capturas/aws/cap_aws02_rol.png
     python aws/capturar.py emr         -> capturas/aws/cap_aws02_emr_app.png
     python aws/capturar.py budget      -> capturas/aws/cap_aws02_budget.png
+    python aws/capturar.py jobs        -> capturas/aws/cap_aws03_jobs.png        (aws/ver_aws03.py)
+    python aws/capturar.py salidas     -> capturas/aws/cap_aws03_s3_salidas.png
+    python aws/capturar.py metricas    -> capturas/aws/cap_aws03_metricas.png
 Las terminales ejecutan "cls" antes del comando. Nunca se muestran claves: sts se consulta con
 --query para mostrar solo cuenta y ARN. Revisar cada PNG antes de versionarlo.
 """
@@ -156,6 +159,10 @@ def main():
                  '--query "application.{Nombre:name,Estado:state,Release:releaseLabel,CPU_max:maximumCapacity.cpu,'
                  'Memoria_max:maximumCapacity.memory,Autoapagado_min:autoStopConfiguration.idleTimeoutMinutes,'
                  'Etiquetas:tags}"' % (TITULO, REGION, app_id), "cap_aws02_emr_app.png")
+    elif op in ("jobs", "salidas", "metricas"):
+        nombre = {"jobs": "cap_aws03_jobs.png", "salidas": "cap_aws03_s3_salidas.png",
+                  "metricas": "cap_aws03_metricas.png"}[op]
+        terminal("title %s && python aws/ver_aws03.py %s" % (TITULO, op), nombre, espera=15)
     elif op == "budget":
         navegador(BUDGETS, "cap_aws02_budget.png", contiene=(PRESUPUESTO, "Budget", "Presupuesto", "Billing", "Facturaci"),
                   pintar=8)
