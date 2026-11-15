@@ -302,8 +302,14 @@ def estado():
     if ip:
         print("%-22s http://%s:%d/  -> %s" % ("URL", ip, PUERTO, "responde (health ok)" if responde(ip) else "NO responde"))
     try:
-        h = costo(precios())[3]
-        print("%-22s %.4f USD/h | %.4f USD/dia | encendida %.1f h -> ~%.4f USD" % ("Costo estimado", h, 24 * h, horas, horas * h))
+        c = costo(precios())
+        if i["State"]["Name"] == "stopped":
+            print("%-22s detenida: solo disco %.4f USD/h | %.4f USD/dia (encendida: %.4f USD/h; --iniciar)"
+                  % ("Costo estimado", c[2], 24 * c[2], c[3]))
+        else:
+            h = c[3]
+            print("%-22s %.4f USD/h | %.4f USD/dia | desde el ultimo inicio %.1f h -> ~%.4f USD"
+                  % ("Costo estimado", h, 24 * h, horas, horas * h))
     except Exception as e:  # noqa: BLE001
         print("%-22s no disponible (%s)" % ("Costo estimado", e.__class__.__name__))
 

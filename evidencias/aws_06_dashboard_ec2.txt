@@ -19,4 +19,6 @@ Precios on-demand US East (Ohio) (AWS Pricing API, consultados 2026-11-15 03:21 
   TOTAL encendida                        0.0163 USD/h | 0.3906 USD/dia | 11.88 USD/mes (730 h)
   detenida (--detener)                   0.0009 USD/h | 0.0210 USD/dia (solo disco; la IPv4 publica se libera al detener)
 
-La instancia queda ENCENDIDA para la sustentacion. Apagar con: python aws/06_dashboard_ec2.py --terminar
+2026-11-14 ~22:30 (UTC-05:00): --detener -> estado stopped (solo cobra el disco, 0.0009 USD/h).
+Antes de la sustentacion: python aws/06_dashboard_ec2.py --iniciar (la IP publica cambia; la nueva URL se anota abajo).
+Al terminar el curso: python aws/06_dashboard_ec2.py --terminar (borra instancia, disco y security group).
