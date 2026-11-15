@@ -16,8 +16,9 @@ Uso (desde la raiz del proyecto):
     python aws/capturar.py replicas04  -> capturas/aws/cap_aws04_s3_replicas.png (antes de borrar)
     python aws/capturar.py glue05      -> capturas/aws/cap_aws05_glue_tablas.png  (aws/ver_aws05.py glue)
     python aws/capturar.py athena05    -> capturas/aws/cap_aws05_athena.png       (aws/ver_aws05.py athena)
-    python aws/capturar.py dashboard   -> capturas/cap14_dashboard.png (Edge en modo app, sin pestanas ni URL;
+    python aws/capturar.py dashboard   -> capturas/cap14_dashboard.png (Edge headless, perfil temporal;
                                           requiere "streamlit run dashboard/app.py" en el puerto 8501)
+    python aws/capturar.py plan        -> capturas/cap14b_plan_accion.png (misma ventana, URL ?vista=plan)
 Las terminales ejecutan "cls" antes del comando. Nunca se muestran claves: sts se consulta con
 --query para mostrar solo cuenta y ARN. Revisar cada PNG antes de versionarlo.
 """
@@ -167,38 +168,26 @@ def capturar_contenido(hwnd, ruta):
     print("Guardado: %s (%dx%d, PrintWindow)" % (os.path.relpath(ruta, BASE), w, h))
 
 
-def dashboard(url="http://localhost:8501/", titulo="SEDALIB - riesgo", nombre="cap14_dashboard.png", escala="0.8"):
-    """Abre el dashboard en Edge modo app con un PERFIL TEMPORAL (sin pestanas, URL, extensiones ni
-    notificaciones del perfil del usuario), escala 80 % para que entre completo, captura en capturas/
-    y cierra esa ventana. El perfil temporal se crea en %TEMP% y no toca el navegador del usuario."""
+def dashboard(url="http://localhost:8501/", nombre="cap14_dashboard.png", escala="0.8", espera_ms=25000):
+    """Captura el dashboard con Edge HEADLESS y PERFIL TEMPORAL: no abre ninguna ventana ni lee pixeles de la
+    pantalla (nada del escritorio del usuario puede salir) y no usa el perfil, pestanas ni extensiones del
+    usuario. Viewport 2400x1300 CSS a escala 0.8 -> PNG 1920x1040.
+    (El metodo anterior, ventana --app + PrintWindow, salio oscurecido: Edge abria un dialogo propio en otra
+    ventana y atenuaba la pagina.)"""
+    import shutil
     import tempfile
     edge = next(p for p in (r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
                             r"C:\Program Files\Microsoft\Edge\Application\msedge.exe") if os.path.exists(p))
     perfil = tempfile.mkdtemp(prefix="sedalib_cap_edge_")
-    proc = subprocess.Popen([edge, "--user-data-dir=" + perfil, "--app=" + url, "--no-first-run",
-                             "--no-default-browser-check", "--disable-notifications", "--disable-translate",
-                             "--disable-features=Translate,msEdgeTranslate,msUndersideButton,CalculateNativeWinOcclusion",
-                             "--disable-backgrounding-occluded-windows", "--disable-renderer-backgrounding", "--lang=es",
-                             "--force-device-scale-factor=" + escala, "--window-position=-4000,0",
-                             "--window-size=1920,1040"])
-    hwnd = buscar_ventana(titulo, timeout=60)
-    if not hwnd:
-        sys.exit("No se abrio la ventana del dashboard")
-    for _ in range(3):                             # fuera de pantalla, tamano fijo, sin activar ni cambiar el orden Z
-        user32.SetWindowPos(hwnd, 0, -4000, 0, 1920, 1040, 0x0014)
-        time.sleep(1)
-    time.sleep(14)                                 # Streamlit carga datos y dibuja los graficos
-    r = RECT()
-    user32.GetWindowRect(hwnd, ctypes.byref(r))
-    if r.right - r.left < 1000:
-        user32.PostMessageW(hwnd, 0x0010, 0, 0)
-        sys.exit("La ventana no tomo el tamano pedido (%dx%d): no se captura" % (r.right - r.left, r.bottom - r.top))
-    capturar_contenido(hwnd, os.path.join(BASE, "capturas", nombre))
-    user32.PostMessageW(hwnd, 0x0010, 0, 0)
+    ruta = os.path.join(BASE, "capturas", nombre)
     try:
-        proc.wait(timeout=15)
-    except subprocess.TimeoutExpired:
-        proc.kill()
+        subprocess.run([edge, "--headless=new", "--user-data-dir=" + perfil, "--no-first-run", "--disable-gpu",
+                        "--hide-scrollbars", "--disable-notifications", "--lang=es", "--window-size=2400,1300",
+                        "--force-device-scale-factor=" + escala, "--virtual-time-budget=%d" % espera_ms,
+                        "--screenshot=" + ruta, url], check=True, capture_output=True, timeout=180)
+    finally:
+        shutil.rmtree(perfil, ignore_errors=True)
+    print("Guardado: %s (Edge headless, escala %s)" % (os.path.relpath(ruta, BASE), escala))
 
 
 def main():
@@ -243,6 +232,8 @@ def main():
         terminal("title %s && python aws/ver_aws05.py %s" % (TITULO, op[:-2]), nombre, espera=15)
     elif op == "dashboard":
         dashboard()
+    elif op == "plan":
+        dashboard(url="http://localhost:8501/?vista=plan", nombre="cap14b_plan_accion.png")
     elif op == "budget":
         navegador(BUDGETS, "cap_aws02_budget.png", contiene=(PRESUPUESTO, "Budget", "Presupuesto", "Billing", "Facturaci"),
                   pintar=8)

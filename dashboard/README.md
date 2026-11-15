@@ -27,7 +27,11 @@ Este paso solo hace falta si se vuelve a generar la capa gold. Requiere credenci
 
 ```bash
 python aws/05_gold_athena.py --exportar    # descarga curated/gold/ a dashboard/data/*.csv
+python src/gold_impacto.py --panel <copia local de processed/master_panel_clima.parquet>
+#   -> gold_impacto_distrito.csv (conexiones afectadas por distrito) y tasa_historica_distrito_mes.csv
 ```
+
+`?vista=plan` al final de la URL abre el tablero directamente en el plan de acción del mes.
 
 Después hay que hacer commit y push de `dashboard/data/` para que la versión publicada use los datos nuevos.
 

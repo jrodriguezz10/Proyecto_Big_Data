@@ -1,0 +1,43 @@
+====================================================================================================
+6.1 CALIDAD DE NUMCONEXDOM Y UNIDADESUSO (raw/operaciones/sunass_interrupciones.csv)
+====================================================================================================
+filas raw: 45671
+NUMCONEXDOM  nulos  23076 (50.53 %) | no numericos 0 | negativos 0 | cero 239 | no enteros 23076 | > 200000: 257
+UNIDADESUSO  nulos  23076 (50.53 %) | no numericos 0 | negativos 0 | cero 2163 | no enteros 23076 | > 200000: 20
+% de nulos por anio de inicio: 2019 100.0 %, 2020 100.0 %, 2021 100.0 %, 2022 41.4 %, 2023 0.0 %, 2024 0.0 %
+primer mes con dato: 202201 (1 % informado); desde 202207 100 % informado
+
+tras limpieza (igual que procesamiento_spark.py) y ventana 2019-06..2023-12: 40691 interrupciones
+registros con valor > 200000 (se anulan ambas columnas): 257
+   por EPS: {'SEDAPAR': 239, 'SEDAPAL': 18}
+interrupciones con dato valido: 17820 de 40691 (43.8 %); meses 2022-01..2023-12
+
+6.2 gold_impacto_distrito: 323 distritos (los de dim_distrito); con dato 294, sin dato 29
+La Libertad:
+            distrito  conexiones_prom_mes  unidades_uso_prom_mes  conexiones_mediana_mes  conexiones_max_evento_prom_mes  meses_con_dato
+            TRUJILLO              93972.8               109138.4                 37655.5                         23411.8              16
+        LA ESPERANZA              69469.3                73374.6                 14633.0                         16215.1               9
+         EL PORVENIR              48819.0                57577.8                  7630.0                          8807.8               9
+   FLORENCIA DE MORA              21063.0                24131.0                  7051.0                          6961.0               5
+           HUANCHACO              15623.4                18657.4                  7188.0                          5218.2               8
+           SALAVERRY              12288.9                17075.1                  5116.5                          3482.1               8
+               MOCHE              11657.1                14125.5                  6609.0                          5377.0              11
+              SIMBAL               9395.5                10857.5                  9395.5                          9395.5               2
+VICTOR LARCO HERRERA               8629.0                10546.8                  6393.0                          5060.5              11
+              CHEPEN               7482.0                10288.0                  7482.0                          4811.0               1
+              PAIJAN               5042.5                 4845.5                  5042.5                          3064.0               2
+              RAZURI               1965.0                 2483.0                  1965.0                          1965.0               1
+             CHOCOPE               1373.0                 1684.0                  1373.0                          1373.0               1
+
+====================================================================================================
+6.3 TASA HISTORICA POR DISTRITO-MES (misma definicion que src/gold.py)
+====================================================================================================
+control AUC-PR holdout 2024: nacional 0.6858 (esperado 0.6858) | La Libertad 0.7336 (esperado 0.7336)
+tasa_historica_distrito_mes.csv: 9367 filas (= filas de gold_riesgo_distrito_mes)
+
+====================================================================================================
+6.4 PUBLICACION
+====================================================================================================
+s3://<bucket>/curated/gold_impacto_distrito/gold_impacto_distrito.parquet  19 705 B  (2026-11-14, aws s3 cp; costo ~0)
+dashboard/data/gold_impacto_distrito.csv, dashboard/data/tasa_historica_distrito_mes.csv
+Las tablas curated/gold/ existentes y el modelo M1-GBT no se modificaron.
