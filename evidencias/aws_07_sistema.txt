@@ -1,0 +1,20 @@
+====================================================================================================
+PASO 7 - URL FIJA HTTPS (CloudFront + IP elastica) Y SCRIPT DEL SISTEMA (us-east-2)
+====================================================================================================
+fecha            : 2026-11-15 07:53:54 (UTC-05:00)
+plan de la cuenta: PAID (ACTIVE), creditos restantes 119.35 USD - no es plan gratuito: CloudFront e IP elastica sin bloqueo
+URL publica      : https://d3ftgn0k0eqvc6.cloudfront.net/
+prueba HTTPS     : GET https://d3ftgn0k0eqvc6.cloudfront.net/ -> HTTP 200 | GET /_stcore/health -> HTTP 200
+prueba HTTP      : GET http://d3ftgn0k0eqvc6.cloudfront.net/ -> 301 -> https://d3ftgn0k0eqvc6.cloudfront.net/ (redirect-to-https)
+acceso directo   : http://18.226.49.5:8501 -> sin respuesta (bloqueado) (el SG solo admite CloudFront)
+CloudFront       : EK...C63H | origen ec2-18-226-49-5.us-east-2.compute.amazonaws.com:8501 HTTP | CachingDisabled + AllViewer | PriceClass_100 | Proyecto=SEDALIB
+IP elastica      : 18.226.49.5 (sedalib-dashboard-eip), Proyecto=SEDALIB
+security group   : sedalib-dashboard-sg: tcp 8501 <- com.amazonaws.global.cloudfront.origin-facing
+instancia        : user-data por arranque (git pull + restart) para publicar datos sin SSH
+
+COSTO (Pricing API, US East (Ohio))
+  encendido : 0.0163 USD/h | 0.3906 USD/dia  (t3.micro 0.0104 + IP elastica 0.0050 + disco 0.0009; CloudFront sin cargo fijo)
+  apagado   : 0.0059 USD/h | 0.1410 USD/dia  (IP elastica sin uso 0.0050 + disco 0.0009)
+  CloudFront: 0.085 USD/GB salida + 0.0100 USD/10k HTTPS; capa gratuita de CloudFront 1 TB y 10 M solicitudes/mes
+
+Operacion: python aws/sistema.py --estado | --encender [--actualizar] | --apagar | --destruir

@@ -1,0 +1,144 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "LeerPlanDeLaCuenta",
+      "Effect": "Allow",
+      "Action": "freetier:GetAccountPlanState",
+      "Resource": "*"
+    },
+    {
+      "Sid": "CloudFrontListarYPoliticasAdministradas",
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:ListDistributions",
+        "cloudfront:GetCachePolicy",
+        "cloudfront:GetOriginRequestPolicy"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "CloudFrontCrearSoloConEtiquetaProyecto",
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:CreateDistribution",
+        "cloudfront:CreateDistributionWithTags",
+        "cloudfront:TagResource"
+      ],
+      "Resource": "arn:aws:cloudfront::*:distribution/*",
+      "Condition": {
+        "StringEquals": { "aws:RequestTag/Proyecto": "SEDALIB" }
+      }
+    },
+    {
+      "Sid": "CloudFrontGestionarSoloLaDistribucionDelProyecto",
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:GetDistribution",
+        "cloudfront:GetDistributionConfig",
+        "cloudfront:UpdateDistribution",
+        "cloudfront:DeleteDistribution",
+        "cloudfront:ListTagsForResource"
+      ],
+      "Resource": "arn:aws:cloudfront::*:distribution/*",
+      "Condition": {
+        "StringEquals": { "aws:ResourceTag/Proyecto": "SEDALIB" }
+      }
+    },
+    {
+      "Sid": "EC2LeerSinRecursoEspecifico",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeAddresses",
+        "ec2:DescribeManagedPrefixLists",
+        "ec2:DescribeSecurityGroupRules"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": { "aws:RequestedRegion": "us-east-2" }
+      }
+    },
+    {
+      "Sid": "IPElasticaCrearSoloEtiquetada",
+      "Effect": "Allow",
+      "Action": "ec2:AllocateAddress",
+      "Resource": "arn:aws:ec2:us-east-2:*:elastic-ip/*",
+      "Condition": {
+        "StringEquals": { "aws:RequestTag/Proyecto": "SEDALIB" }
+      }
+    },
+    {
+      "Sid": "IPElasticaEtiquetarAlCrear",
+      "Effect": "Allow",
+      "Action": "ec2:CreateTags",
+      "Resource": "arn:aws:ec2:us-east-2:*:elastic-ip/*",
+      "Condition": {
+        "StringEquals": { "ec2:CreateAction": "AllocateAddress" }
+      }
+    },
+    {
+      "Sid": "IPElasticaAsociarLiberarSoloLaDelProyecto",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:AssociateAddress",
+        "ec2:DisassociateAddress",
+        "ec2:ReleaseAddress"
+      ],
+      "Resource": "arn:aws:ec2:us-east-2:*:elastic-ip/*",
+      "Condition": {
+        "StringEquals": { "aws:ResourceTag/Proyecto": "SEDALIB" }
+      }
+    },
+    {
+      "Sid": "IPElasticaAsociarSoloALaInstanciaDelProyecto",
+      "Effect": "Allow",
+      "Action": "ec2:AssociateAddress",
+      "Resource": "arn:aws:ec2:us-east-2:*:instance/*",
+      "Condition": {
+        "StringEquals": { "aws:ResourceTag/Proyecto": "SEDALIB" }
+      }
+    },
+    {
+      "Sid": "IPElasticaInterfazDeRed",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:AssociateAddress",
+        "ec2:DisassociateAddress"
+      ],
+      "Resource": "arn:aws:ec2:us-east-2:*:network-interface/*"
+    },
+    {
+      "Sid": "ReglasDeEntradaSoloDelSecurityGroupDelProyecto",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:AuthorizeSecurityGroupIngress",
+        "ec2:RevokeSecurityGroupIngress"
+      ],
+      "Resource": "arn:aws:ec2:us-east-2:*:security-group/*",
+      "Condition": {
+        "StringEquals": { "aws:ResourceTag/Proyecto": "SEDALIB" }
+      }
+    },
+    {
+      "Sid": "ReglasDeEntradaConPrefixListCloudFront",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:AuthorizeSecurityGroupIngress",
+        "ec2:RevokeSecurityGroupIngress"
+      ],
+      "Resource": [
+        "arn:aws:ec2:us-east-2:aws:prefix-list/*",
+        "arn:aws:ec2:us-east-2:*:security-group-rule/*"
+      ]
+    },
+    {
+      "Sid": "UserDataPorArranqueSoloDeLaInstanciaDelProyecto",
+      "Effect": "Allow",
+      "Action": "ec2:ModifyInstanceAttribute",
+      "Resource": "arn:aws:ec2:us-east-2:*:instance/*",
+      "Condition": {
+        "StringEquals": { "aws:ResourceTag/Proyecto": "SEDALIB" }
+      }
+    }
+  ]
+}

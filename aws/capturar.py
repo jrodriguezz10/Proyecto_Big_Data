@@ -21,6 +21,8 @@ Uso (desde la raiz del proyecto):
     python aws/capturar.py plan        -> capturas/cap14b_plan_accion.png (misma ventana, URL ?vista=plan)
     python aws/capturar.py ec2estado   -> capturas/aws/cap_aws06_instancia.png (06_dashboard_ec2.py --estado, PrintWindow)
     python aws/capturar.py ec2dash=http://<IP>:8501/ -> capturas/aws/cap_aws06_dashboard_ec2.png (Edge normal, perfil temporal)
+    python aws/capturar.py cf07=https://<dominio>.cloudfront.net/ -> capturas/aws/cap_aws07_cloudfront.png
+    python aws/capturar.py sistema07   -> capturas/aws/cap_aws07_sistema.png (aws/sistema.py --estado, PrintWindow)
 Las terminales ejecutan "cls" antes del comando. Nunca se muestran claves: sts se consulta con
 --query para mostrar solo cuenta y ARN. Revisar cada PNG antes de versionarlo.
 """
@@ -279,6 +281,10 @@ def main():
         terminal("title %s && python aws/ver_aws05.py %s" % (TITULO, op[:-2]), nombre, espera=15)
     elif op == "ec2estado":
         terminal_pw("title %s && python aws/06_dashboard_ec2.py --estado" % TITULO, "cap_aws06_instancia.png", espera=25)
+    elif op == "sistema07":
+        terminal_pw("title %s && python aws/sistema.py --estado" % TITULO, "cap_aws07_sistema.png", espera=30)
+    elif op.startswith("cf07="):                    # cf07=https://<dominio>.cloudfront.net/
+        navegador_url(op.split("=", 1)[1], "cap_aws07_cloudfront.png")
     elif op.startswith("ec2dash="):                 # ec2dash=http://<IP>:8501/
         navegador_url(op.split("=", 1)[1], "cap_aws06_dashboard_ec2.png")
     elif op == "dashboard":
