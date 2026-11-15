@@ -19,6 +19,8 @@ Uso (desde la raiz del proyecto):
     python aws/capturar.py dashboard   -> capturas/cap14_dashboard.png (Edge headless, perfil temporal;
                                           requiere "streamlit run dashboard/app.py" en el puerto 8501)
     python aws/capturar.py plan        -> capturas/cap14b_plan_accion.png (misma ventana, URL ?vista=plan)
+    python aws/capturar.py ec2estado   -> capturas/aws/cap_aws06_instancia.png (06_dashboard_ec2.py --estado, PrintWindow)
+    python aws/capturar.py ec2dash=http://<IP>:8501/ -> capturas/aws/cap_aws06_dashboard_ec2.png (Edge normal, perfil temporal)
 Las terminales ejecutan "cls" antes del comando. Nunca se muestran claves: sts se consulta con
 --query para mostrar solo cuenta y ARN. Revisar cada PNG antes de versionarlo.
 """
@@ -190,6 +192,51 @@ def dashboard(url="http://localhost:8501/", nombre="cap14_dashboard.png", escala
     print("Guardado: %s (Edge headless, escala %s)" % (os.path.relpath(ruta, BASE), escala))
 
 
+def terminal_pw(comando, nombre, espera=15):
+    """Como terminal(), pero captura con PrintWindow (contenido de la ventana, no pixeles de la pantalla)."""
+    cerrar_sobrantes()
+    subprocess.Popen('start "%s" cmd /k "cls && %s"' % (TITULO, comando), shell=True, cwd=BASE).wait()
+    time.sleep(espera)
+    hwnd = buscar_ventana(TITULO)
+    if not hwnd:
+        sys.exit("No se encontro la ventana de consola '%s'" % TITULO)
+    capturar_contenido(hwnd, os.path.join(DEST, nombre))
+    user32.PostMessageW(hwnd, 0x0010, 0, 0)
+
+
+def navegador_url(url, nombre, titulo="SEDALIB - riesgo", espera=25):
+    """Edge en ventana NORMAL (con barra de direccion visible) y PERFIL TEMPORAL: sin pestanas, extensiones
+    ni sesion del usuario. Ventana fuera de pantalla, captura con PrintWindow (no lee la pantalla)."""
+    import shutil
+    import tempfile
+    edge = next(p for p in (r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+                            r"C:\Program Files\Microsoft\Edge\Application\msedge.exe") if os.path.exists(p))
+    perfil = tempfile.mkdtemp(prefix="sedalib_cap_edge_")
+    proc = subprocess.Popen([edge, "--user-data-dir=" + perfil, "--new-window", url, "--no-first-run",
+                             "--no-default-browser-check", "--disable-notifications", "--disable-translate",
+                             "--disable-sync", "--disable-extensions", "--hide-crash-restore-bubble",
+                             "--disable-features=Translate,msEdgeTranslate,msUndersideButton,CalculateNativeWinOcclusion,"
+                             "msImplicitSignin,msEdgeSidebarV2,msHubApps",
+                             "--disable-backgrounding-occluded-windows", "--disable-renderer-backgrounding", "--lang=es",
+                             "--force-device-scale-factor=0.8", "--window-position=-4000,0", "--window-size=1920,1040"])
+    try:
+        hwnd = buscar_ventana(titulo, timeout=90)
+        if not hwnd:
+            sys.exit("No se abrio la ventana del dashboard")
+        for _ in range(3):
+            user32.SetWindowPos(hwnd, 0, -4000, 0, 1920, 1040, 0x0014)
+            time.sleep(1)
+        time.sleep(espera)
+        capturar_contenido(hwnd, os.path.join(DEST, nombre))
+        user32.PostMessageW(hwnd, 0x0010, 0, 0)
+        proc.wait(timeout=20)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+    finally:
+        time.sleep(2)
+        shutil.rmtree(perfil, ignore_errors=True)
+
+
 def main():
     if len(sys.argv) != 2:
         sys.exit(__doc__)
@@ -230,6 +277,10 @@ def main():
     elif op in ("glue05", "athena05"):
         nombre = {"glue05": "cap_aws05_glue_tablas.png", "athena05": "cap_aws05_athena.png"}[op]
         terminal("title %s && python aws/ver_aws05.py %s" % (TITULO, op[:-2]), nombre, espera=15)
+    elif op == "ec2estado":
+        terminal_pw("title %s && python aws/06_dashboard_ec2.py --estado" % TITULO, "cap_aws06_instancia.png", espera=25)
+    elif op.startswith("ec2dash="):                 # ec2dash=http://<IP>:8501/
+        navegador_url(op.split("=", 1)[1], "cap_aws06_dashboard_ec2.png")
     elif op == "dashboard":
         dashboard()
     elif op == "plan":

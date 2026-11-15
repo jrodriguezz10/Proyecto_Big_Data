@@ -1,0 +1,22 @@
+====================================================================================================
+PASO 6 - DASHBOARD EN AMAZON EC2 (us-east-2)
+====================================================================================================
+instancia      : i-...ad3f  (Name=sedalib-dashboard)
+tipo           : t3.micro | AMI al2023-ami-2023.12.20261112.0-kernel-6.18-x86_64 | zona us-east-2a
+inicio         : 2026-11-14 22:19:54 (UTC-05:00)
+URL            : http://3.148.182.237:8501/
+verificacion   : GET /_stcore/health -> ok | GET / -> HTTP 200 | listo 87 s despues del lanzamiento
+acceso         : sin key pair, sin rol IAM, IMDSv2 obligatorio; SG sedalib-dashboard-sg: entrada solo TCP 8501 0.0.0.0/0
+disco          : gp3 8 GB cifrado, DeleteOnTermination
+etiquetas      : Proyecto=SEDALIB, Curso=BigData-UPAO, Name=sedalib-dashboard
+servicio       : systemd sedalib-dashboard -> streamlit run dashboard/app.py --server.port 8501 --server.address 0.0.0.0
+
+COSTO ESTIMADO
+Precios on-demand US East (Ohio) (AWS Pricing API, consultados 2026-11-15 03:21 UTC):
+  instancia t3.micro Linux               0.0104 USD/h   ($0.0104 per On Demand Linux t3.micro Instance Hour)
+  IPv4 publica en uso                    0.0050 USD/h   ($0.005 per In-use public IPv4 address per hour)
+  disco gp3 8 GB                         0.0009 USD/h   (0.0800 USD/GB-mes x 8 GB / 730 h)
+  TOTAL encendida                        0.0163 USD/h | 0.3906 USD/dia | 11.88 USD/mes (730 h)
+  detenida (--detener)                   0.0009 USD/h | 0.0210 USD/dia (solo disco; la IPv4 publica se libera al detener)
+
+La instancia queda ENCENDIDA para la sustentacion. Apagar con: python aws/06_dashboard_ec2.py --terminar

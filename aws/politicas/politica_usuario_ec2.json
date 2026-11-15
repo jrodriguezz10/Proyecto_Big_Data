@@ -1,0 +1,128 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "LeerSinRecursoEspecifico",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeInstances",
+        "ec2:DescribeInstanceStatus",
+        "ec2:DescribeSecurityGroups",
+        "ec2:DescribeImages",
+        "ec2:DescribeVpcs",
+        "ec2:DescribeSubnets",
+        "pricing:GetProducts"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": { "aws:RequestedRegion": ["us-east-2", "us-east-1"] }
+      }
+    },
+    {
+      "Sid": "LeerAMIAmazonLinux2023",
+      "Effect": "Allow",
+      "Action": "ssm:GetParameter",
+      "Resource": "arn:aws:ssm:us-east-2::parameter/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
+    },
+    {
+      "Sid": "LanzarSoloT3MicroEtiquetada",
+      "Effect": "Allow",
+      "Action": "ec2:RunInstances",
+      "Resource": "arn:aws:ec2:us-east-2:*:instance/*",
+      "Condition": {
+        "StringEquals": { "ec2:InstanceType": "t3.micro", "aws:RequestTag/Proyecto": "SEDALIB" }
+      }
+    },
+    {
+      "Sid": "LanzarSoloDiscoGp3Etiquetado",
+      "Effect": "Allow",
+      "Action": "ec2:RunInstances",
+      "Resource": "arn:aws:ec2:us-east-2:*:volume/*",
+      "Condition": {
+        "StringEquals": { "ec2:VolumeType": "gp3", "aws:RequestTag/Proyecto": "SEDALIB" },
+        "NumericLessThanEquals": { "ec2:VolumeSize": "8" }
+      }
+    },
+    {
+      "Sid": "LanzarSoloConAMIDeAmazon",
+      "Effect": "Allow",
+      "Action": "ec2:RunInstances",
+      "Resource": "arn:aws:ec2:us-east-2::image/*",
+      "Condition": {
+        "StringEquals": { "ec2:Owner": "amazon" }
+      }
+    },
+    {
+      "Sid": "LanzarSoloConElSecurityGroupDelProyecto",
+      "Effect": "Allow",
+      "Action": "ec2:RunInstances",
+      "Resource": "arn:aws:ec2:us-east-2:*:security-group/*",
+      "Condition": {
+        "StringEquals": { "aws:ResourceTag/Proyecto": "SEDALIB" }
+      }
+    },
+    {
+      "Sid": "LanzarRedDeLaVPCPorDefecto",
+      "Effect": "Allow",
+      "Action": "ec2:RunInstances",
+      "Resource": [
+        "arn:aws:ec2:us-east-2:*:subnet/*",
+        "arn:aws:ec2:us-east-2:*:network-interface/*"
+      ]
+    },
+    {
+      "Sid": "CrearSecurityGroupEtiquetado",
+      "Effect": "Allow",
+      "Action": "ec2:CreateSecurityGroup",
+      "Resource": "arn:aws:ec2:us-east-2:*:security-group/*",
+      "Condition": {
+        "StringEquals": { "aws:RequestTag/Proyecto": "SEDALIB" }
+      }
+    },
+    {
+      "Sid": "CrearSecurityGroupEnLaVPC",
+      "Effect": "Allow",
+      "Action": "ec2:CreateSecurityGroup",
+      "Resource": "arn:aws:ec2:us-east-2:*:vpc/*"
+    },
+    {
+      "Sid": "EtiquetarSoloAlCrear",
+      "Effect": "Allow",
+      "Action": "ec2:CreateTags",
+      "Resource": [
+        "arn:aws:ec2:us-east-2:*:instance/*",
+        "arn:aws:ec2:us-east-2:*:volume/*",
+        "arn:aws:ec2:us-east-2:*:security-group/*"
+      ],
+      "Condition": {
+        "StringEquals": { "ec2:CreateAction": ["RunInstances", "CreateSecurityGroup"] }
+      }
+    },
+    {
+      "Sid": "ReglasYBorradoSoloDelSecurityGroupDelProyecto",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:AuthorizeSecurityGroupIngress",
+        "ec2:DeleteSecurityGroup"
+      ],
+      "Resource": "arn:aws:ec2:us-east-2:*:security-group/*",
+      "Condition": {
+        "StringEquals": { "aws:ResourceTag/Proyecto": "SEDALIB" }
+      }
+    },
+    {
+      "Sid": "IniciarDetenerTerminarYDiagnosticarSoloLaInstanciaDelProyecto",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:StartInstances",
+        "ec2:StopInstances",
+        "ec2:TerminateInstances",
+        "ec2:GetConsoleOutput"
+      ],
+      "Resource": "arn:aws:ec2:us-east-2:*:instance/*",
+      "Condition": {
+        "StringEquals": { "aws:ResourceTag/Proyecto": "SEDALIB" }
+      }
+    }
+  ]
+}
