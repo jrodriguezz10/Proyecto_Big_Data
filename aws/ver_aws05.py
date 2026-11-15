@@ -2,6 +2,7 @@
 
     python aws/ver_aws05.py glue     -> tablas de sedalib_gold en Glue Data Catalog (glue:GetTables)
     python aws/ver_aws05.py athena   -> ejecuta Q1 (top 10 La Libertad) en Athena y muestra el resultado
+    python aws/ver_aws05.py q2q3     -> ejecuta Q2 (alertas vs reales por mes) y Q3 (recall 2024) con datos escaneados
 """
 import sys
 import time
@@ -72,5 +73,61 @@ def athena():
             print("  ".join("-" * x for x in an))
 
 
+def _sql(nombre):
+    """Lee Q2/Q3 de aws/05_gold_athena.py sin ejecutarlo (mismas consultas de la evidencia)."""
+    import ast
+    import os
+    arbol = ast.parse(open(os.path.join(os.path.dirname(__file__), "05_gold_athena.py"), encoding="utf-8").read())
+    for n in arbol.body:
+        if isinstance(n, ast.Assign) and getattr(n.targets[0], "id", None) == nombre:
+            return n.value.value
+    raise KeyError(nombre)
+
+
+def _correr(a, sql):
+    cuerpo = "\n".join(l for l in sql.splitlines() if not l.startswith("--"))
+    qid = a.start_query_execution(QueryString=cuerpo, QueryExecutionContext={"Database": DB}, WorkGroup="primary",
+                                  ResultConfiguration={"OutputLocation": "s3://%s/logs/athena/" % BUCKET})["QueryExecutionId"]
+    while True:
+        q = a.get_query_execution(QueryExecutionId=qid)["QueryExecution"]
+        if q["Status"]["State"] in ("SUCCEEDED", "FAILED", "CANCELLED"):
+            break
+        time.sleep(1)
+    if q["Status"]["State"] != "SUCCEEDED":
+        sys.exit(m(q["Status"].get("StateChangeReason", q["Status"]["State"])))
+    filas = [[c.get("VarCharValue", "") for c in r["Data"]]
+             for r in a.get_query_results(QueryExecutionId=qid)["ResultSet"]["Rows"]]
+    return q, qid, filas
+
+
+def q2q3():
+    a = ses.client("athena")
+    print("Amazon Athena (%s) | workgroup primary | base %s | tablas en s3://<bucket>/curated/gold/" % (REGION, DB))
+    q, qid, f = _correr(a, _sql("Q2"))
+    st = q["Statistics"]
+    print("\n-- Q2. Alertas del modelo frente a interrupciones reales por mes (nacional y La Libertad)")
+    print("   id %s... | %s | escaneado %.1f KB | motor %d ms | %d meses"
+          % (qid[:8], q["Status"]["State"], st["DataScannedInBytes"] / 1024, st["EngineExecutionTimeInMillis"], len(f) - 1))
+    cab = "%-7s %3s %7s %6s %7s %6s" % ("mes", "llu", "alertas", "reales", "alert_LL", "real_LL")
+    datos = ["%4s-%02d %3s %7s %6s %7s %6s" % (r[0], int(r[1]), r[2], r[3], r[4], r[5], r[6]) for r in f[1:]]
+    mitad = (len(datos) + 1) // 2
+    print("   " + cab + "      " + cab)
+    for i in range(mitad):
+        der = datos[i + mitad] if i + mitad < len(datos) else ""
+        print("   " + datos[i] + "      " + der)
+    q, qid, f = _correr(a, _sql("Q3"))
+    st = q["Statistics"]
+    print("\n-- Q3. Recall y precision de las alertas en el holdout 2024 (TP / (TP + FN))")
+    print("   id %s... | %s | escaneado %.1f KB | motor %d ms" % (qid[:8], q["Status"]["State"],
+                                                                st["DataScannedInBytes"] / 1024,
+                                                                st["EngineExecutionTimeInMillis"]))
+    for k, r in enumerate(f):
+        print("   " + "  ".join(c.ljust(12) if i == 0 else c.rjust(8) for i, c in enumerate(r)))
+        if k == 0:
+            print("   " + "-" * 60)
+    print("\nllu = temporada de lluvia (dic-abr). 2024-05 incompleto en el origen (SUNASS termina el 2024-05-07).")
+    print("Athena factura 5 USD/TB con minimo 10 MB por consulta: 2 consultas = ~0.0001 USD.")
+
+
 if __name__ == "__main__":
-    {"glue": glue, "athena": athena}[sys.argv[1]]()
+    {"glue": glue, "athena": athena, "q2q3": q2q3}[sys.argv[1]]()

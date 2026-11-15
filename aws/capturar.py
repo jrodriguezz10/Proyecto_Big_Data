@@ -23,6 +23,11 @@ Uso (desde la raiz del proyecto):
     python aws/capturar.py ec2dash=http://<IP>:8501/ -> capturas/aws/cap_aws06_dashboard_ec2.png (Edge normal, perfil temporal)
     python aws/capturar.py cf07=https://<dominio>.cloudfront.net/ -> capturas/aws/cap_aws07_cloudfront.png
     python aws/capturar.py sistema07   -> capturas/aws/cap_aws07_sistema.png (aws/sistema.py --estado, PrintWindow)
+    python aws/capturar.py athena_q2q3 -> capturas/aws/cap_aws05_athena_q2_q3.png (aws/ver_aws05.py q2q3)
+    python aws/capturar.py modelo09    -> capturas/aws/cap_aws09_modelo_definitivo.png (aws/ver_evidencias.py modelo)
+    python aws/capturar.py impacto09   -> capturas/aws/cap_aws09_impacto.png (aws/ver_evidencias.py impacto)
+    python aws/capturar.py estimado08  -> capturas/aws/cap_aws08_pricing_calculator.png (aws/08_costos.py --estimado)
+    python aws/capturar.py real08      -> capturas/aws/cap_aws08_costo_real.png (aws/08_costos.py --real)
 Las terminales ejecutan "cls" antes del comando. Nunca se muestran claves: sts se consulta con
 --query para mostrar solo cuenta y ARN. Revisar cada PNG antes de versionarlo.
 """
@@ -194,10 +199,16 @@ def dashboard(url="http://localhost:8501/", nombre="cap14_dashboard.png", escala
     print("Guardado: %s (Edge headless, escala %s)" % (os.path.relpath(ruta, BASE), escala))
 
 
-def terminal_pw(comando, nombre, espera=15):
-    """Como terminal(), pero captura con PrintWindow (contenido de la ventana, no pixeles de la pantalla)."""
+def terminal_pw(comando, nombre, espera=15, tam=None):
+    """Como terminal(), pero captura con PrintWindow (contenido de la ventana, no pixeles de la pantalla).
+    tam=(ancho, alto): redimensiona la ventana ANTES de que corra el comando (pausa de 4 s con ping)."""
     cerrar_sobrantes()
-    subprocess.Popen('start "%s" cmd /k "cls && %s"' % (TITULO, comando), shell=True, cwd=BASE).wait()
+    previo = "ping -n 5 127.0.0.1 >nul && " if tam else ""
+    subprocess.Popen('start "%s" cmd /k "%scls && %s"' % (TITULO, previo, comando), shell=True, cwd=BASE).wait()
+    if tam:
+        hwnd = buscar_ventana(TITULO)
+        if hwnd:
+            user32.SetWindowPos(hwnd, 0, 0, 0, tam[0], tam[1], 0x0016)    # NOMOVE|NOZORDER|NOACTIVATE
     time.sleep(espera)
     hwnd = buscar_ventana(TITULO)
     if not hwnd:
@@ -281,6 +292,21 @@ def main():
         terminal("title %s && python aws/ver_aws05.py %s" % (TITULO, op[:-2]), nombre, espera=15)
     elif op == "ec2estado":
         terminal_pw("title %s && python aws/06_dashboard_ec2.py --estado" % TITULO, "cap_aws06_instancia.png", espera=25)
+    elif op == "athena_q2q3":
+        terminal_pw("title %s && python aws/ver_aws05.py q2q3" % TITULO, "cap_aws05_athena_q2_q3.png", espera=30,
+                    tam=(1500, 1000))
+    elif op == "modelo09":
+        terminal_pw("title %s && python aws/ver_evidencias.py modelo" % TITULO, "cap_aws09_modelo_definitivo.png",
+                    espera=12, tam=(1500, 1040))
+    elif op == "impacto09":
+        terminal_pw("title %s && python aws/ver_evidencias.py impacto" % TITULO, "cap_aws09_impacto.png",
+                    espera=12, tam=(1500, 900))
+    elif op == "estimado08":
+        terminal_pw("title %s && python aws/08_costos.py --estimado" % TITULO, "cap_aws08_pricing_calculator.png",
+                    espera=30, tam=(1500, 1040))
+    elif op == "real08":
+        terminal_pw("title %s && python aws/08_costos.py --real" % TITULO, "cap_aws08_costo_real.png", espera=25,
+                    tam=(1500, 900))
     elif op == "sistema07":
         terminal_pw("title %s && python aws/sistema.py --estado" % TITULO, "cap_aws07_sistema.png", espera=30)
     elif op.startswith("cf07="):                    # cf07=https://<dominio>.cloudfront.net/
