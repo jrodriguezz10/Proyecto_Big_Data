@@ -29,4 +29,11 @@ Precios unitarios usados:
 Capas gratuitas (no restadas arriba): Glue Data Catalog 1 M objetos y 1 M solicitudes/mes; CloudFront 1 TB
 y 10 M solicitudes/mes (siempre gratis). Restandolas, Glue y CloudFront quedan en 0.
 La IP elastica se cobra 730 h aunque EC2 este detenida (por eso el escenario academico la incluye completa).
-Calculadora calculator.aws: no automatizada (ver nota en el resumen del paso 8).
+Calculadora AWS (calculator.aws, enlace publico, armada el 2026-11-16 con perfil temporal):
+  https://calculator.aws/#/estimate?id=7ba8b66fcc0542dd34b1c90b99de62824e42ab3c
+  Total calculadora: 6.57 USD/mes (78.84 USD/12 meses). Por servicio: S3 0.03 | EMR 0.76 | Glue 0.00 | Athena 0.05 |
+  EC2+EBS 1.98 | VPC IPv4 3.65 | CloudFront 0.10.
+  Diferencia con la API (7.05): -0.48 USD. Casi toda es el EBS: la calculadora prorratea el gp3 de 8 GB a las 176 h de
+  la instancia (8 x 0.08 x 176/730 = 0.15 USD) y la API cobra el mes completo (0.64 USD). En este proyecto el disco
+  existe las 730 h aunque EC2 este detenida, asi que el costo real se acerca a la cifra de la API. El resto: Glue
+  0.001 USD que la calculadora deja en 0 por la capa gratuita, y redondeos.
